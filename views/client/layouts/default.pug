@@ -1,0 +1,261 @@
+doctype html 
+html 
+    head 
+        title #{pageTitle} - TechStore Shop
+        //-nhung bootstrap
+        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css")
+        link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css")
+        //-nhung Google Fonts
+        link(rel="preconnect", href="https://fonts.googleapis.com")
+        link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
+        link(href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap", rel="stylesheet")
+        //-nhung file public
+        link(rel="stylesheet", href="/css/style.css")
+        style.
+            body {
+                background-image: url('/images/background.jpg'); /* Đường dẫn đến ảnh nền */
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed; /* Giữ ảnh cố định khi cuộn trang */
+                background-repeat: no-repeat;
+                position: relative;
+                min-height: 100vh;
+                font-family: 'Poppins', sans-serif;
+                color: #333;
+            }
+
+            body::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.85); /* Độ trong suốt nhẹ hơn */
+                z-index: -1;
+            }
+
+            /* Typography */
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 600;
+                color: #2a5298;
+            }
+
+            p {
+                font-family: 'Poppins', sans-serif;
+                line-height: 1.6;
+            }
+
+            /* Card styling */
+            .card {
+                border: none;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s ease;
+                overflow: hidden;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            .card-img-top {
+                transition: all 0.5s ease;
+            }
+            
+            .card:hover .card-img-top {
+                transform: scale(1.05);
+            }
+
+            .card-title {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 600;
+            }
+
+            /* Button styling */
+            .btn {
+                border-radius: 30px;
+                padding: 0.5rem 1.5rem;
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 500;
+                letter-spacing: 0.5px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary {
+                background: linear-gradient(45deg, #1e3c72, #2a5298);
+                border: none;
+                box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(30, 60, 114, 0.4);
+            }
+
+            .btn-outline-primary {
+                border-color: #2a5298;
+                color: #2a5298;
+            }
+
+            .btn-outline-primary:hover {
+                background-color: #2a5298;
+                color: white;
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(30, 60, 114, 0.2);
+            }
+
+            /* Form control */
+            .form-control {
+                border-radius: 30px;
+                padding: 0.75rem 1.5rem;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            /* Nav styling */
+            .nav-link {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 500;
+            }
+
+            /* Alert styling */
+            .alert {
+                border-radius: 10px;
+                border: none;
+            }
+
+            /* Price styling */
+            .price {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 700;
+                color: #e44d26;
+            }
+
+            .price-old {
+                text-decoration: line-through;
+                color: #999;
+                font-weight: 400;
+            }
+
+            /* Badge styling */
+            .badge {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 600;
+                padding: 0.5em 1em;
+                border-radius: 30px;
+            }
+
+            /* Footer styling */
+            .client-footer {
+                background-color: #1e3c72;
+                color: white;
+                padding: 4rem 0 2rem;
+                margin-top: 4rem;
+            }
+
+            .footer-heading {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 600;
+                color: white;
+                margin-bottom: 1.5rem;
+            }
+
+            .footer-link {
+                color: rgba(255, 255, 255, 0.8);
+                text-decoration: none;
+                transition: all 0.3s;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .footer-link:hover {
+                color: white;
+                transform: translateX(5px);
+            }
+
+            .footer-social .btn {
+                color: white;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                padding: 0;
+                line-height: 40px;
+                text-align: center;
+                margin-right: 10px;
+                transition: all 0.3s;
+            }
+
+            .footer-social .btn:hover {
+                background-color: white;
+                color: #1e3c72;
+                transform: translateY(-5px);
+            }
+
+            .footer-bottom {
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding-top: 1.5rem;
+                margin-top: 3rem;
+                text-align: center;
+                color: rgba(255, 255, 255, 0.7);
+            }
+
+            /* Đảm bảo nội dung hiển thị đúng */
+            .container {
+                position: relative;
+                z-index: 1;
+            }
+        
+        block style
+    body 
+        include ../partials/header.pug
+
+        block main 
+
+        // Thêm footer đẹp và chuyên nghiệp hơn
+        footer.client-footer
+            .container
+                .row
+                    .col-lg-3.col-md-6.mb-4.mb-lg-0
+                        h5.footer-heading Về LMQ Store
+                        p Chúng tôi cung cấp các sản phẩm công nghệ chất lượng cao với giá cả hợp lý. Sứ mệnh của chúng tôi là mang công nghệ tiên tiến đến tay mọi người.
+                        .footer-social.mt-4
+                            a.btn(href="#"): i.fab.fa-facebook-f
+                            a.btn(href="#"): i.fab.fa-twitter
+                            a.btn(href="#"): i.fab.fa-instagram
+                            a.btn(href="#"): i.fab.fa-youtube
+                    
+                    .col-lg-3.col-md-6.mb-4.mb-lg-0
+                        h5.footer-heading Liên kết nhanh
+                        a.footer-link(href="/") Trang chủ
+                        a.footer-link(href="/products") Sản phẩm
+                        a.footer-link(href="/blog") Blog
+                        a.footer-link(href="/about") Giới thiệu
+                        a.footer-link(href="/contact") Liên hệ
+                    
+                    .col-lg-3.col-md-6.mb-4.mb-lg-0
+                        h5.footer-heading Chính sách
+                        a.footer-link(href="#") Điều khoản sử dụng
+                        a.footer-link(href="#") Chính sách bảo mật
+                        a.footer-link(href="#") Chính sách đổi trả
+                        a.footer-link(href="#") Chính sách vận chuyển
+                        a.footer-link(href="#") Phương thức thanh toán
+                    
+                    .col-lg-3.col-md-6
+                        h5.footer-heading Liên hệ với chúng tôi
+                        a.footer-link(href="#") 123 Đường Trần Phú, Quận Hà Đông, Hà Nội
+                        a.footer-link(href="#") 0123.456.789
+                        a.footer-link(href="#") luongminhquy@gmail.com
+                        a.footer-link(href="#") Thứ 2 - Thứ 6: 8:00 - 20:00
+                
+                .footer-bottom
+                    p &copy; 2025 LMQ Shop. Tất cả quyền được bảo lưu.
+
+        //-nhung file public va bootstrap
+        script(src="/js/script.js")
+        script(src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js")
+        script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js")
+        
+        block scripts

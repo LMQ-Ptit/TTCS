@@ -1,0 +1,289 @@
+extend ../../layouts/default.pug
+
+block main 
+    //- Thông báo hệ thống
+    .card-body.p-4
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                i.fas.fa-exclamation-circle.me-2
+                | #{messages.error}
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative
+                i.fas.fa-check-circle.me-2
+                | #{messages.success}
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+    .container-fluid.py-4
+        // Phần chào mừng và thông tin admin
+        .card.mb-4.border-0.shadow-sm
+            .card-body
+                .row.align-items-center
+                    .col-auto
+                        .bg-primary.text-white.rounded-circle.p-3.d-flex.align-items-center.justify-content-center(style="width: 64px; height: 64px")
+                            i.fas.fa-user-shield.fa-2x
+                    .col
+                        .d-flex.align-items-center.mb-1
+                            h2.text-primary.mb-0 Xin chào, #{user.fullName}!
+                            // Hiển thị vai trò của admin từ user.role
+                            if user.role
+                                .badge.bg-primary-subtle.text-primary.ms-3.rounded-pill.px-3.py-2
+                                    i.fas.fa-id-badge.me-2
+                                    | #{user.role === 'admin' ? 'Quản trị viên cấp cao' : user.role}
+
+                        p.text-muted.mb-0
+                            i.fas.fa-calendar-alt.me-2
+                            span#current-date
+                            |  | 
+                            i.fas.fa-clock.me-2
+                            span#current-time Đang tải...
+                    .col-md-auto.mt-3.mt-md-0
+                        a.btn.btn-outline-primary(href="/admin/my-account")
+                            i.fas.fa-user-cog.me-2
+                            | Quản lý tài khoản
+
+        // Thẻ thống kê
+        .row.g-4.mb-4
+            .col-xl-3.col-md-6
+                .card.border-start.border-primary.border-5.rounded-3.shadow-sm.h-100
+                    .card-body.p-3
+                        .d-flex.justify-content-between.align-items-center.mb-3
+                            .text-primary
+                                i.fas.fa-boxes.fa-2x
+                            .badge.bg-primary-subtle.text-primary.rounded-pill.px-3.py-2 Sản phẩm
+                        h3.display-6.fw-bold.mb-1 #{statistic.product.total}
+                        p.text-muted.mb-0 Tổng số sản phẩm
+
+            .col-xl-3.col-md-6
+                .card.border-start.border-success.border-5.rounded-3.shadow-sm.h-100
+                    .card-body.p-3
+                        .d-flex.justify-content-between.align-items-center.mb-3
+                            .text-success
+                                i.fas.fa-user-shield.fa-2x
+                            .badge.bg-success-subtle.text-success.rounded-pill.px-3.py-2 Admin
+                        h3.display-6.fw-bold.mb-1 #{statistic.account.total}
+                        p.text-muted.mb-0 Quản trị viên
+
+            .col-xl-3.col-md-6
+                .card.border-start.border-info.border-5.rounded-3.shadow-sm.h-100
+                    .card-body.p-3
+                        .d-flex.justify-content-between.align-items-center.mb-3
+                            .text-info
+                                i.fas.fa-users.fa-2x
+                            .badge.bg-info-subtle.text-info.rounded-pill.px-3.py-2 Người dùng
+                        h3.display-6.fw-bold.mb-1 #{statistic.user.total}
+                        .d-flex.align-items-center
+                            span.badge.bg-success.rounded-pill.me-2 #{statistic.user.active}
+                            span.text-muted Hoạt động
+
+            .col-xl-3.col-md-6
+                .card.border-start.border-warning.border-5.rounded-3.shadow-sm.h-100
+                    .card-body.p-3
+                        .d-flex.justify-content-between.align-items-center.mb-3
+                            .text-warning
+                                i.fas.fa-user-friends.fa-2x
+                            .badge.bg-warning-subtle.text-warning.rounded-pill.px-3.py-2 Tổng tài khoản
+                        h3.display-6.fw-bold.mb-1 #{statistic.account.total + statistic.user.total}
+                        p.text-muted.mb-0 Admin + Người dùng
+
+        // Thêm thông tin phân quyền
+        .row.mb-4
+            .col-lg-12.mb-4
+                .card.shadow-sm
+                    .card-header.bg-gradient.bg-primary.text-white.py-3
+                        h5.mb-0
+                            i.fas.fa-user-tag.me-2
+                            | Thông tin phân quyền
+
+                    .card-body
+                        .row.align-items-center
+                            .col-md-3.border-end.text-center.py-3
+                                .bg-light.rounded-circle.mx-auto.p-4.d-flex.align-items-center.justify-content-center(style="width: 100px; height: 100px")
+                                    i.fas.fa-id-badge.fa-3x.text-primary
+                                h5.mt-3.fw-bold Vai trò của bạn
+                                .badge.bg-primary.px-3.py-2.rounded-pill.mt-1
+                                    | #{user.role === 'admin' ? 'Quản trị viên cấp cao' : user.role}
+
+                            .col-md-9.py-3
+                                h5.border-bottom.pb-2 Quyền hạn của #{user.role === 'admin' ? 'Quản trị viên cấp cao' : user.role}:
+                                .row.mt-3
+                                    if user.role === 'admin'
+                                        .col-md-6.mb-3
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Quản lý tất cả tài khoản admin
+                                        .col-md-6.mb-3
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Quản lý người dùng
+                                        .col-md-6.mb-3
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Quản lý sản phẩm
+                                        .col-md-6.mb-3
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Quản lý danh mục
+                                        .col-md-6
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Phân quyền hệ thống
+                                        .col-md-6
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Truy cập mọi tính năng
+                                    else if user.role === 'editor'
+                                        .col-md-6.mb-3
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Quản lý sản phẩm
+                                        .col-md-6.mb-3
+                                            .d-flex.align-items-center
+                                                i.fas.fa-check-circle.text-success.me-2
+                                                | Quản lý danh mục
+                                        .col-md-6.mb-3
+                                            .d-flex.align-items-center
+                                                i.fas.fa-times-circle.text-danger.me-2
+                                                | Không thể quản lý tài khoản
+                                        .col-md-6
+                                            .d-flex.align-items-center
+                                                i.fas.fa-times-circle.text-danger.me-2
+                                                | Không thể phân quyền
+                                    else
+                                        .col-12
+                                            .d-flex.align-items-center
+                                                i.fas.fa-info-circle.text-info.me-2
+                                                | Quyền hạn được cấu hình theo vai trò của bạn
+                                
+        .row.mb-4
+            .col-lg-8.mb-4.mb-lg-0
+                .card.shadow-sm
+                    .card-header.bg-gradient.bg-primary.text-white.py-3
+                        .d-flex.justify-content-between.align-items-center
+                            h5.mb-0 
+                                i.fas.fa-chart-bar.me-2
+                                | Tổng quan người dùng
+                    .card-body
+                        .row.g-0.text-center
+                            .col-4.p-4.border-end
+                                .display-5.fw-bold.text-primary #{statistic.user.total}
+                                p.mb-0 Tổng người dùng
+                            .col-4.p-4.border-end
+                                .display-5.fw-bold.text-success #{statistic.user.active}
+                                p.mb-0 Đang hoạt động
+                            .col-4.p-4
+                                .display-5.fw-bold.text-danger #{statistic.user.inactive}
+                                p.mb-0 Đã bị khóa
+                        hr.my-4
+                        .progress.mt-2(style="height: 20px")
+                            - const activePercentage = (statistic.user.active / statistic.user.total * 100) || 0;
+                            - const inactivePercentage = (statistic.user.inactive / statistic.user.total * 100) || 0;
+                            .progress-bar.bg-success(
+                                role="progressbar"
+                                style=`width: ${activePercentage}%`
+                                aria-valuenow=activePercentage
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            ) Hoạt động (#{Math.round(activePercentage)}%)
+                            .progress-bar.bg-danger(
+                                role="progressbar"
+                                style=`width: ${inactivePercentage}%`
+                                aria-valuenow=inactivePercentage
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            ) Bị khóa (#{Math.round(inactivePercentage)}%)
+
+            .col-lg-4
+                .card.shadow-sm.h-100
+                    .card-header.bg-gradient.bg-primary.text-white.py-3
+                        h5.mb-0 
+                            i.fas.fa-bolt.me-2
+                            | Thao tác nhanh
+                    .card-body.d-grid.gap-3
+                        a.btn.btn-outline-primary.d-flex.align-items-center.py-3(href="/admin/products/create")
+                            i.fas.fa-plus-circle.me-3.fa-lg
+                            span.flex-grow-1.text-start Thêm sản phẩm mới
+                            i.fas.fa-chevron-right
+
+                        a.btn.btn-outline-primary.d-flex.align-items-center.py-3(href="/admin/products")
+                            i.fas.fa-boxes.me-3.fa-lg
+                            span.flex-grow-1.text-start Quản lý sản phẩm
+                            i.fas.fa-chevron-right
+
+                        a.btn.btn-outline-primary.d-flex.align-items-center.py-3(href="/admin/accounts")
+                            i.fas.fa-users-cog.me-3.fa-lg
+                            span.flex-grow-1.text-start Quản lý tài khoản
+                            i.fas.fa-chevron-right
+
+                        a.btn.btn-outline-primary.d-flex.align-items-center.py-3(href="/admin/user")
+                            i.fas.fa-user-friends.me-3.fa-lg
+                            span.flex-grow-1.text-start Quản lý người dùng
+                            i.fas.fa-chevron-right
+
+    script.
+        // Hiển thị ngày giờ hiện tại
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('vi-VN', options);
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('vi-VN');
+        }
+        
+        // Cập nhật mỗi giây
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });

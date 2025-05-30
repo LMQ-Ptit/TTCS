@@ -1,0 +1,72 @@
+header.admin-header.shadow-sm.sticky-top
+    .container-fluid
+        .row.align-items-center.py-2
+            .col-auto.d-xl-none
+                button#sidebarToggle.btn.btn-light.border-0.rounded-circle.p-2.me-2
+                    i.fas.fa-bars
+            .col-auto.me-auto
+                .admin-logo
+                    a.d-flex.align-items-center.text-decoration-none(href="/admin/dashboard")
+                        .logo-icon.bg-primary.text-white.rounded.p-2.me-2.d-flex.align-items-center.justify-content-center
+                            i.fas.fa-store-alt.fa-lg
+                        .logo-text
+                            h5.fw-bold.mb-0.text-primary LMQ Admin
+                            small.text-muted.d-none.d-sm-inline Hệ thống quản trị
+
+            .col-auto
+                .d-flex.align-items-center
+                   
+                    // User dropdown
+                    .dropdown
+                        button.admin-user-dropdown.px-1.py-1.border.rounded-pill.d-flex.align-items-center(
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        )
+                            if user.avatar
+                                img.rounded-circle.me-md-2(
+                                    src=user.avatar
+                                    alt=user.fullName
+                                    width="32"
+                                    height="32"
+                                    style="object-fit: cover"
+                                )
+                            else
+                                .rounded-circle.bg-primary.text-white.d-flex.align-items-center.justify-content-center.me-md-2(
+                                    style="width: 32px; height: 32px"
+                                )
+                                    i.fas.fa-user
+                            
+                            span.d-none.d-md-block.me-1= user.fullName
+                            .badge.bg-primary-subtle.text-primary.d-none.d-md-block.me-2
+                                = user.role === 'admin' ? 'Admin' : user.role
+                            
+                            i.fas.fa-chevron-down.text-muted.small
+                        
+                        .dropdown-menu.dropdown-menu-end.shadow-sm.border-0.rounded-3.mt-2(style="min-width: 240px")
+                            .p-3.border-bottom.text-center
+                                if user.avatar
+                                    img.rounded-circle.mb-2.shadow-sm.border(
+                                        src=user.avatar
+                                        alt=user.fullName
+                                        width="60"
+                                        height="60"
+                                        style="object-fit: cover"
+                                    )
+                                else
+                                    .rounded-circle.bg-primary.text-white.d-flex.align-items-center.justify-content-center.mx-auto.mb-2(
+                                        style="width: 60px; height: 60px"
+                                    )
+                                        i.fas.fa-user.fa-lg
+                                
+                                h6.fw-bold.mb-0= user.fullName
+                                p.text-muted.small.mb-0= user.email
+                            
+                            .dropdown-divider.m-0
+                            a.dropdown-item.py-2(href="/admin/my-account")
+                                i.fas.fa-user-circle.me-2.text-primary
+                                | Tài khoản của tôi
+                            .dropdown-divider
+                            a.dropdown-item.py-2.text-danger(href="/admin/auth/logout")
+                                i.fas.fa-sign-out-alt.me-2
+                                | Đăng xuất     

@@ -1,0 +1,125 @@
+extends ../../layouts/default.pug
+include ../../mixin/layoutProduct.pug
+
+block main
+    // Hero Banner nổi bật
+    .bg-primary.text-white.py-5.mb-5.hero-section
+        .container
+            .row.align-items-center
+                .col-lg-6.mb-4.mb-lg-0
+                    h1.display-4.fw-bold.mb-3 Welcome to LMQ Store
+                    p.lead.mb-4 Khám phá những sản phẩm chất lượng cao với giá ưu đãi tại LMQ Store. Thế giới mua sắm trong tầm tay bạn.
+                    .d-flex.gap-3
+                        a.btn.btn-light.btn-lg.shadow-sm.rounded-pill(href="/products")
+                            i.fas.fa-shopping-bag.me-2
+                            | Mua sắm ngay
+                        a.btn.btn-outline-light.btn-lg.rounded-pill(href="#featured-products")
+                            i.fas.fa-star.me-2
+                            | Sản phẩm nổi bật
+                .col-lg-6
+                    img.img-fluid.rounded-3.shadow(src="https://images.pexels.com/photos/9783812/pexels-photo-9783812.jpeg?auto=compress&cs=tinysrgb&w=600", alt="LMQ Store Hero Image")
+
+    // Thông báo alert
+    .container.mb-5
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                i.fas.fa-exclamation-circle.me-2
+                | #{messages.error}
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative
+                i.fas.fa-check-circle.me-2
+                | #{messages.success}
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+    .container
+        
+        // Phần sản phẩm nổi bật
+        section.mb-5#featured-products
+            .card.border-0.shadow-sm.rounded-4.overflow-hidden.mb-4
+                .card-header.bg-gradient.py-4.border-0
+                    .d-flex.justify-content-between.align-items-center
+                        div
+                            h2.fs-3.mb-1.text-primary
+                                i.fas.fa-star.text-warning.me-2
+                                | Sản phẩm nổi bật
+                            p.text-muted.mb-0 Những sản phẩm được yêu thích nhất tại LMQ Store
+                        a.btn.btn-primary.rounded-pill(href="/products?featured=1")
+                            | Xem tất cả
+                            i.fas.fa-arrow-right.ms-2
+                .card-body.p-4
+                    +product-grid(products)
+
+        // Phần sản phẩm mới nhất
+        section.mb-5
+            .card.border-0.shadow-sm.rounded-4.overflow-hidden
+                .card-header.bg-gradient.py-4.border-0
+                    .d-flex.justify-content-between.align-items-center
+                        div
+                            h2.fs-3.mb-1.text-primary
+                                i.fas.fa-bolt.text-warning.me-2
+                                | Sản phẩm mới nhất
+                            p.text-muted.mb-0 Khám phá những sản phẩm mới nhất tại cửa hàng
+                        a.btn.btn-primary.rounded-pill(href="/products?sort=newest")
+                            | Xem tất cả
+                            i.fas.fa-arrow-right.ms-2
+                .card-body.p-4
+                    +product-grid(newProducts)
+        
+        
+    script.
+         // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });
+    

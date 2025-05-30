@@ -1,0 +1,172 @@
+extends ../../layouts/default.pug
+block main
+    .container
+        // Thông báo alert
+        if messages.error || messages.success
+            .row.mb-4
+                .col-12
+                    if messages.error
+                        .alert.alert-danger.alert-dismissible.fade.show.position-relative.shadow-sm.border-0.rounded-3
+                            i.fas.fa-exclamation-circle.me-2
+                            | #{messages.error}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+                    if messages.success
+                        .alert.alert-success.alert-dismissible.fade.show.position-relative.shadow-sm.border-0.rounded-3
+                            i.fas.fa-check-circle.me-2
+                            | #{messages.success}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+    .container.py-4
+        .row.mb-4
+            .col-12
+                h2.text-primary.mb-0
+                    i.fas.fa-shopping-cart.me-2
+                    | Giỏ hàng của bạn
+        if(cart.product.length > 0)
+            .row
+                .col-lg-8
+                    .card.shadow-sm.mb-4
+                        .card-body.p-0
+                            table.table.table-hover.align-middle.mb-0
+                                thead.bg-light
+                                    tr 
+                                        th.text-center(width="5%") STT
+                                        th(width="15%") Ảnh
+                                        th(width="30%") Sản phẩm
+                                        th.text-end(width="15%") Đơn giá
+                                        th.text-center(width="15%") Số lượng
+                                        th.text-end(width="15%") Thành tiền
+                                        th.text-center(width="5%")
+                                tbody
+                                    each item, index in cart.product
+                                        tr
+                                            td.text-center #{index + 1}
+                                            td
+                                                img.rounded.shadow-sm(
+                                                    src=item.productInfo.thumbnail
+                                                    alt=item.productInfo.title
+                                                    style="width: 80px; height: 80px; object-fit: cover;"
+                                                )
+                                            td
+                                                a.text-decoration-none.text-dark(href=`/products/${item.productInfo.slug}`)
+                                                    .fw-bold #{item.productInfo.title}
+                                            td.text-end.text-danger.fw-bold $#{item.productInfo.priceNew}
+                                            td.text-center
+                                                .input-group.input-group-sm.justify-content-center(style="width: 120px")
+                                                    input.form-control.text-center(
+                                                        type="number"
+                                                        name="quantity"
+                                                        value=item.quantity
+                                                        min="1"
+                                                        product-id=item.product_id
+                                                    )
+                                            td.text-end.fw-bold $#{item.totalPrice}
+                                            td.text-center
+                                                button.btn.btn-outline-danger.btn-sm(
+                                                    onclick=`removeItem('${item.product_id}')`
+                                                )
+                                                    i.fas.fa-trash Xóa
+
+                .col-lg-4
+                    //- Tao khung vien (card) và bóng đổ cho card (shadow-sm)
+                    //-py-3 : pading top và bottom = 3
+                    //-bg-white : background màu trắng
+                    //-mb-4 : margin bottom = 4
+                    //- justify-content-between : căn giữa các phần tử con
+                    //- w-100 : chiều rộng 100%
+                    .card.shadow-sm.mb-4
+                        .card-header.bg-white.py-3
+                            h5.card-title.mb-0
+                                i.fas.fa-receipt.me-2
+                                | Tổng đơn hàng
+                        .card-body
+                            .d-flex.justify-content-between.mb-2
+                                span Tạm tính:
+                                span.fw-bold $#{cart.totalPrice}
+                            .d-flex.justify-content-between.mb-2
+                                span Phí vận chuyển:
+                                span.text-success Miễn phí
+                            hr
+                            .d-flex.justify-content-between.mb-3
+                                span.h5 Tổng cộng:
+                                span.h5.text-danger $#{cart.totalPrice}
+
+                            a.btn.btn-primary.w-100.mb-2(href="/checkout")
+                                i.fas.fa-credit-card.me-2
+                                | Thanh toán ngay
+                            a.btn.btn-outline-primary.w-100.mb-2(href="/products")
+                                i.fas.fa-arrow-left.me-2
+                                | Tiếp tục mua sắm
+                            a.btn.btn-outline-primary.w-100(href="/cart/history")
+                                i.fas.fa-arrow-left.me-2
+                                | Lịch sử mua hàng
+        else
+            .card.shadow-sm.text-center.py-5
+                i.fas.fa-shopping-cart.fa-3x.text-muted.mb-3
+                h3.text-muted Giỏ hàng trống
+                p.text-muted.mb-4 Bạn chưa có sản phẩm nào trong giỏ hàng
+                a.btn.btn-primary(href="/products")
+                    i.fas.fa-shopping-bag.me-2
+                    | Mua sắm ngay
+                a.btn.btn-outline-primary.w-100(href="/cart/history")
+                                i.fas.fa-arrow-left.me-2
+                                | Lịch sử mua hàng
+        
+
+    script.
+        function removeItem(productId) {
+            if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                window.location.href = `/cart/delete/${productId}`;
+            }
+        }
+    script.
+        // Xử lý tự động tắt alert
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                let timer;
+                
+                timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    progressBar.style.width = percentage + '%';
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft);
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        }
+    script(src="/js/cart.js")

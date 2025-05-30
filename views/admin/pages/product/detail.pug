@@ -1,0 +1,214 @@
+extends ../../layouts/default.pug 
+
+block main
+    .container-fluid.py-4
+        .d-flex.justify-content-between.align-items-center.mb-4
+            .page-header
+                h1.text-primary.mb-0.d-flex.align-items-center
+                    i.fas.fa-box-open.me-2
+                    | Chi tiết sản phẩm
+                .text-muted.mt-2 #{product.title}
+            .d-flex.gap-2
+                a.btn.btn-primary(href=`/admin/products/edit/${product._id}`)
+                    i.fas.fa-edit.me-2
+                    | Chỉnh sửa
+                a.btn.btn-outline-primary(href="/admin/products")
+                    i.fas.fa-arrow-left.me-2
+                    | Quay lại
+
+        .row
+            // Cột trái - Hình ảnh và thông tin cơ bản
+            .col-lg-5.mb-4
+                .card.shadow.h-100
+                    .card-header.bg-white.py-3.border-bottom
+                        h5.mb-0 
+                            i.fas.fa-image.me-2
+                            | Hình ảnh sản phẩm
+                    
+                    .card-body.d-flex.flex-column.justify-content-center
+                        .product-image.text-center.p-3.mb-3
+                            if product.thumbnail
+                                img.img-fluid.rounded.shadow-sm(
+                                    src=product.thumbnail
+                                    alt=product.title
+                                    style="max-height: 350px; object-fit: contain;"
+                                )
+                            else
+                                img.img-fluid.rounded.shadow-sm(
+                                    src='/images/no-image.jpg'
+                                    alt="No image available"
+                                    style="max-height: 350px; object-fit: contain;"
+                                )
+                        
+                        if product.images && product.images.length > 0
+                            .product-gallery.mt-3
+                                h6.mb-3.border-bottom.pb-2 Thư viện ảnh
+                                .row.g-2
+                                    each image, index in product.images.slice(0, 6)
+                                        .col-4
+                                            img.img-thumbnail.shadow-sm.gallery-image(
+                                                src=image
+                                                alt=`${product.title} - Ảnh ${index+1}`
+                                                style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;"
+                                            )
+                                    
+                                    if product.images.length > 6
+                                        .col-4.position-relative
+                                            .overlay-image
+                                                img.img-thumbnail.shadow-sm(
+                                                    src=product.images[6]
+                                                    alt=`${product.title} - More images`
+                                                    style="height: 80px; width: 100%; object-fit: cover; filter: brightness(40%);"
+                                                )
+                                                .position-absolute.top-50.start-50.translate-middle.text-white.fw-bold +#{product.images.length - 6}
+
+            // Cột phải - Thông tin chi tiết
+            .col-lg-7
+                .row.g-4
+                    // Thông tin giá & Tình trạng
+                    .col-md-12
+                        .card.shadow
+                            .card-header.bg-white.d-flex.justify-content-between.align-items-center
+                                h5.mb-0
+                                    i.fas.fa-tags.me-2
+                                    | Thông tin giá & Tình trạng
+                                span.badge.rounded-pill(class=product.status === "active" ? "bg-success" : "bg-danger")
+                                    i(class=product.status === "active" ? "fas fa-check-circle me-1" : "fas fa-ban me-1")
+                                    | #{product.status === "active" ? "Đang hoạt động" : "Không hoạt động"}
+                            
+                            .card-body
+                                .row.g-4
+                                    .col-md-3.col-6
+                                        .info-card.bg-light.rounded.p-3.h-100
+                                            label.text-muted.small.d-block Giá gốc
+                                            .h4.text-primary.mb-0
+                                                i.fas.fa-tag.me-2
+                                                | #{new Intl.NumberFormat('vi-VN').format(product.price)}₫
+                                    
+                                    .col-md-3.col-6
+                                        .info-card.bg-light.rounded.p-3.h-100
+                                            label.text-muted.small.d-block Giảm giá
+                                            .h4.text-success.mb-0
+                                                i.fas.fa-percentage.me-2
+                                                | #{product.discountPercentage}%
+                                    
+                                    .col-md-3.col-6.mt-md-0.mt-3
+                                        .info-card.bg-light.rounded.p-3.h-100
+                                            label.text-muted.small.d-block Giá sau giảm
+                                            .h4.text-danger.mb-0
+                                                i.fas.fa-money-bill-wave.me-2
+                                                - const discountedPrice = Math.round(product.price * (1 - product.discountPercentage / 100))
+                                                | #{new Intl.NumberFormat('vi-VN').format(discountedPrice)}₫
+                                    
+                                    .col-md-3.col-6.mt-md-0.mt-3
+                                        .info-card.bg-light.rounded.p-3.h-100
+                                            label.text-muted.small.d-block Tồn kho
+                                            .h4(class=product.stock > 10 ? "text-success" : (product.stock > 0 ? "text-warning" : "text-danger")).mb-0
+                                                i.fas.fa-boxes.me-2
+                                                | #{product.stock}
+
+                    // Thông tin cơ bản
+                    .col-md-6
+                        .card.shadow.h-100
+                            .card-header.bg-white
+                                h5.mb-0
+                                    i.fas.fa-info-circle.me-2
+                                    | Thông tin cơ bản
+                            
+                            .card-body.p-0
+                                ul.list-group.list-group-flush
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-hashtag.me-2
+                                            | ID
+                                        span.fw-medium #{product._id}
+                                    
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-link.me-2
+                                            | Slug
+                                        span.fw-medium #{product.slug}
+                                    
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-folder.me-2
+                                            | Danh mục
+                                        if product.product_category_id
+                                            if categoryInfo
+                                                a.badge.bg-info.rounded-pill.text-decoration-none(href=`/admin/products-category/detail/${categoryInfo._id}`)
+                                                    | #{categoryInfo.title}
+                                            else
+                                                span.badge.bg-info.rounded-pill #{product.product_category_id}
+                                        else
+                                            span.badge.bg-secondary.rounded-pill Không có
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-sort-numeric-up.me-2
+                                            | Vị trí
+                                        span.fw-medium #{product.position || 0}
+                    
+                    // Thời gian và người tạo
+                    .col-md-6
+                        .card.shadow.h-100
+                            .card-header.bg-white
+                                h5.mb-0
+                                    i.fas.fa-history.me-2
+                                    | Lịch sử
+                            
+                            .card-body.p-0
+                                ul.list-group.list-group-flush
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-calendar-plus.me-2
+                                            | Ngày tạo
+                                        span.fw-medium #{new Date(product.createdAt).toLocaleString('vi-VN')}
+                                    
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-calendar-alt.me-2
+                                            | Cập nhật lần cuối
+                                        span.fw-medium #{new Date(product.updatedAt).toLocaleString('vi-VN')}
+                                    
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-user.me-2
+                                            | Người tạo
+                                        if product.createdBy
+                                            span.badge.bg-primary.rounded-pill #{product.createdBy}
+                                        else
+                                            span.badge.bg-secondary.rounded-pill Admin
+                                    
+                                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                                        span.text-muted
+                                            i.fas.fa-eye.me-2
+                                            | Lượt xem
+                                        span.fw-medium #{product.views || 0}
+
+                    // Mô tả sản phẩm
+                    .col-md-12
+                        .card.shadow
+                            .card-header.bg-white
+                                h5.mb-0 
+                                    i.fas.fa-align-left.me-2
+                                    | Mô tả sản phẩm
+                            
+                            .card-body
+                                if product.description && product.description.trim() !== ""
+                                    .description.bg-light.rounded.p-3
+                                        p.mb-0 #{product.description}
+                                else
+                                    .alert.alert-light.mb-0
+                                        i.fas.fa-info-circle.me-2
+                                        | Chưa có mô tả cho sản phẩm này.
+                            
+                            .card-footer.bg-white.py-3.d-flex.gap-2
+                                a.btn.btn-primary(href=`/admin/products/edit/${product._id}`)
+                                    i.fas.fa-edit.me-2
+                                    | Sửa sản phẩm
+                                a.btn.btn-outline-danger.delete-product(href=`javascript:;` data-id=product._id data-name=product.title)
+                                    i.fas.fa-trash-alt.me-2
+                                    | Xóa sản phẩm
+                                a.btn.btn-outline-success(href=`/products/${product.slug}` target="_blank")
+                                    i.fas.fa-external-link-alt.me-2
+                                    | Xem trên trang chủ
+

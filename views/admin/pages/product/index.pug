@@ -1,0 +1,337 @@
+extend ../../layouts/default.pug  
+include ../../mixin/filter-status.pug
+include ../../mixin/search.pug
+include ../../mixin/pagination.pug
+include ../../mixin/sort.pug
+
+block main
+    .container-fluid.py-4
+        // Page header with title and action button
+        .d-flex.flex-wrap.justify-content-between.align-items-center.mb-4
+            .page-title-wrapper
+                h4.text-primary.mb-1
+                    i.fas.fa-boxes.me-2
+                    | Quản lý Sản phẩm
+                nav(aria-label="breadcrumb")
+                    ol.breadcrumb.mb-0
+                        li.breadcrumb-item
+                            a(href="/admin/dashboard")
+                                i.fas.fa-home.text-primary.me-1
+                                | Trang chủ
+                        li.breadcrumb-item.active(aria-current="page") Sản phẩm
+                
+            .d-flex.align-items-center
+                a.btn.btn-primary.d-flex.align-items-center(href="/admin/products/create")
+                    i.fas.fa-plus-circle.me-2
+                    | Thêm sản phẩm mới
+        
+        // Thông báo
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-danger.border-4.rounded-3
+                .d-flex.align-items-center
+                    i.fas.fa-exclamation-circle.me-3.text-danger.fa-lg
+                    .flex-grow-1= messages.error
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+                    
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-success.border-4.rounded-3
+                .d-flex.align-items-center
+                    i.fas.fa-check-circle.me-3.text-success.fa-lg
+                    .flex-grow-1= messages.success
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        .card.border-0.shadow-sm.mb-4
+            .card-header.bg-white.py-3
+                .row.g-3.align-items-center
+                    .col-lg-3.col-md-6
+                        +filterStatus(filterStatus)
+                    .col-lg-5.col-md-6
+                        +search()
+                    .col-lg-4.d-flex.justify-content-lg-end.mt-3.mt-lg-0
+                        +sort()
+            
+            .card-body.p-0
+                .table-responsive
+                    table.table.table-hover.align-middle.mb-0.border-bottom
+                        thead.bg-light
+                            tr
+                                th.text-center(width="5%") #
+                                th(width="15%") Sản phẩm
+                                th(width="25%") Thông tin
+                                th.text-end(width="10%") Giá
+                                th.text-center(width="10%") Vị trí
+                                th.text-center(width="15%") Trạng thái
+                                th.text-center(width="20%") Thao tác
+                        tbody
+                            if products.length === 0
+                                tr
+                                    td.text-center.py-5(colspan="7")
+                                        .text-muted
+                                            i.fas.fa-box-open.fa-3x.mb-3.d-block
+                                            p.mb-0 Không tìm thấy sản phẩm nào
+                            else
+                                each product, index in products
+                                    tr(class=product.status === "inactive" ? "table-secondary" : "")
+                                        td.text-center #{index + 1}
+                                        td
+                                            .d-flex.align-items-center
+                                                .product-thumbnail.me-3.rounded.overflow-hidden.border.shadow-sm(style="width: 60px; height: 60px;")
+                                                    if product.thumbnail
+                                                        img.img-fluid(src=product.thumbnail, alt=product.title, style="width: 100%; height: 100%; object-fit: cover;")
+                                                    else
+                                                        .bg-light.d-flex.align-items-center.justify-content-center(style="height: 100%")
+                                                            i.fas.fa-image.text-muted
+                                        
+                                        td
+                                            .d-flex.flex-column
+                                                a.product-name.text-decoration-none.fw-bold.mb-1(href=`/admin/products/detail/${product.id}`)
+                                                    | #{product.title}
+                                                small.text-muted
+                                                    i.fas.fa-info-circle.me-1
+                                                    | ID: #{product.id}
+                                        
+                                        td.text-end
+                                            .fw-bold.text-primary
+                                                | #{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                                        
+                                        td.text-center #{product.position}
+                                        
+                                        td.text-center
+                                            if(product.status == "active")
+                                                button.badge.rounded-pill.bg-success-subtle.text-success.border-0.px-3.py-2(
+                                                    button-change-status 
+                                                    data-status="active"
+                                                    data-id=product.id
+                                                )
+                                                    i.fas.fa-check-circle.me-1
+                                                    | Hoạt động
+                                            else 
+                                                button.badge.rounded-pill.bg-danger-subtle.text-danger.border-0.px-3.py-2(
+                                                    button-change-status
+                                                    data-status="inactive"
+                                                    data-id=product.id
+                                                )
+                                                    i.fas.fa-ban.me-1
+                                                    | Không hoạt động
+                                        
+                                        td.text-center
+                                            .btn-group
+                                                a.btn.btn-sm.btn-outline-info(
+                                                    href=`/admin/products/detail/${product.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Xem chi tiết"
+                                                )
+                                                    i.fas.fa-eye
+                                                
+                                                a.btn.btn-sm.btn-outline-primary(
+                                                    href=`/admin/products/edit/${product.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Chỉnh sửa"
+                                                )
+                                                    i.fas.fa-edit
+                                                
+                                                button.btn.btn-sm.btn-outline-danger(
+                                                    button-delete 
+                                                    data-id=product.id
+                                                    data-bs-toggle="tooltip"
+                                                    title="Xóa"
+                                                )
+                                                    i.fas.fa-trash-alt
+
+            .card-footer.bg-white.py-3
+                .row.align-items-center
+                    .col-md-6.text-muted
+                        .d-flex.align-items-center
+                            i.fas.fa-info-circle.me-2
+                            | Hiển thị #{pagination.limitItems} / #{pagination.totalItems} sản phẩm
+                    .col-md-6
+                        +pagination(pagination)
+
+    form#form-change-status(action="" method="POST" data-path="/admin/products/change-status")
+    form#form-delete-item(action="" method="POST" data-path="/admin/products/delete")
+    
+    // Modal xác nhận xóa
+    .modal.fade#deleteConfirmModal(tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                .modal-header.bg-danger.text-white
+                    h5.modal-title#deleteConfirmModalLabel
+                        i.fas.fa-exclamation-triangle.me-2
+                        | Xác nhận xóa
+                    button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal" aria-label="Close")
+                .modal-body
+                    p Bạn có chắc chắn muốn xóa sản phẩm này?
+                    p.text-danger.mb-0
+                        i.fas.fa-exclamation-circle.me-2
+                        | Hành động này không thể hoàn tác.
+                .modal-footer
+                    button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Hủy
+                    button.btn.btn-danger#confirmDelete(type="button")
+                        i.fas.fa-trash-alt.me-2
+                        | Xóa
+
+    style.
+        /* Thiết kế nâng cao */
+        .page-title-wrapper {
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+        }
+        
+        .breadcrumb {
+            font-size: 0.85rem;
+        }
+        
+        .product-name {
+            color: #2a5298;
+            transition: color 0.2s;
+        }
+        
+        .product-name:hover {
+            color: #0d6efd;
+        }
+        
+        .product-thumbnail {
+            transition: transform 0.2s;
+        }
+        
+        .product-thumbnail:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Thiết kế các nút trạng thái */
+        .badge {
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        button.badge {
+            cursor: pointer;
+        }
+        
+        button.badge:hover {
+            opacity: 0.8;
+        }
+        
+        /* Thiết kế các nút thao tác */
+        .btn-group .btn {
+            padding: 0.375rem 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-group .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Thiết kế bảng */
+        .table {
+            box-shadow: none;
+        }
+        
+        .table thead th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            color: #495057;
+        }
+        
+        /* Hoạt ảnh cho cảnh báo */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        
+        .alert {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+    script.
+        // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Xử lý xác nhận xóa sản phẩm
+            const deleteButtons = document.querySelectorAll('[button-delete]');
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    confirmDeleteBtn.setAttribute('data-id', productId);
+                    deleteModal.show();
+                });
+            });
+            
+            confirmDeleteBtn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                const form = document.getElementById('form-delete-item');
+                form.action = `${form.getAttribute('data-path')}/${productId}`;
+                form.submit();
+                deleteModal.hide();
+            });
+            
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });
+
+    script(src="/admin/js/product.js")

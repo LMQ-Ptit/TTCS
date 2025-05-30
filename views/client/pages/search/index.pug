@@ -1,0 +1,220 @@
+extends ../../layouts/default.pug
+include ../../mixin/layoutProduct.pug
+include ../../mixin/pagination.pug
+
+block main
+    // Hero header cho trang tìm kiếm
+    .search-hero.bg-light.py-4.mb-4
+        .container
+            .row.align-items-center
+                .col-lg-8
+                    nav(aria-label="breadcrumb")
+                        ol.breadcrumb.mb-2
+                            li.breadcrumb-item
+                                a.text-decoration-none(href="/") Trang chủ
+                            li.breadcrumb-item.active(aria-current="page") Tìm kiếm
+                    h1.display-5.fw-bold.mb-0 
+                        | Kết quả tìm kiếm: 
+                        if keyword
+                            span.text-primary "#{keyword}"
+                .col-lg-4.mt-3.mt-lg-0
+                    form.input-group.shadow-sm.rounded-pill.overflow-hidden(action="/search", method="GET")
+                        input.form-control.border-0.py-2(type="search", name="keyword", placeholder="Tìm kiếm sản phẩm...", value=keyword)
+                        button.btn.btn-primary.px-3(type="submit")
+                            i.fas.fa-search
+
+    .container
+        // Thông báo alert
+        if messages.error || messages.success
+            .row.mb-4
+                .col-12
+                    if messages.error
+                        .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                            i.fas.fa-exclamation-circle.me-2
+                            | #{messages.error}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+                    if messages.success
+                        .alert.alert-success.alert-dismissible.fade.show.position-relative
+                            i.fas.fa-check-circle.me-2
+                            | #{messages.success}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        .row.g-4.mb-4
+            .col-12
+                // Thanh sắp xếp và hiển thị
+                .card.border-0.shadow-sm.rounded-3.mb-4
+                    .card-body.py-2
+                        .d-flex.flex-wrap.justify-content-between.align-items-center
+                            .products-found.py-2
+                                if products && products.length > 0
+                                    span.fw-bold.me-1 #{pagination.totalItems}
+                                    | sản phẩm tìm thấy
+                                else 
+                                    | Không tìm thấy sản phẩm nào phù hợp
+                            
+                            if products && products.length > 0
+                                .sorting-options.d-flex.align-items-center.gap-3
+                                    .text-nowrap.d-none.d-sm-block Sắp xếp theo:
+                                    select.form-select.form-select-sm.rounded-pill.shadow-sm.border-0#sortSearch(onchange="applySorting()")
+                                        option(value="position", selected=sortType === "position") Nổi bật
+                                        option(value="newest", selected=sortType === "newest") Mới nhất
+                                        option(value="price-asc", selected=sortType === "price-asc") Giá: Thấp đến cao
+                                        option(value="price-desc", selected=sortType === "price-desc") Giá: Cao đến thấp
+                                        option(value="name-asc", selected=sortType === "name-asc") Tên: A-Z
+                                        option(value="name-desc", selected=sortType === "name-desc") Tên: Z-A
+                                                            
+                                    .view-option.d-flex.align-items-center.ms-2
+                                        button.btn.btn-sm.btn-outline-secondary.rounded-start.active#grid-view(type="button")
+                                            i.fas.fa-th
+                                        button.btn.btn-sm.btn-outline-secondary.rounded-end#list-view(type="button")
+                                            i.fas.fa-list
+                
+                // Sản phẩm Grid
+                .products-grid.fade-in
+                    +product-grid(products)
+                
+                // Phân trang và thông tin
+                if products && products.length > 0
+                    .card.border-0.shadow-sm.rounded-3.mt-4
+                        .card-body.py-3
+                            .row.align-items-center.text-center
+                                .col-md-6.text-md-start.mb-3.mb-md-0
+                                    .text-muted
+                                        | Hiển thị 
+                                        span.fw-bold #{(pagination.currentPage - 1) * pagination.limitItems + 1}
+                                        |  - 
+                                        span.fw-bold
+                                            if pagination.currentPage * pagination.limitItems > pagination.totalItems
+                                                | #{pagination.totalItems}
+                                            else
+                                                | #{pagination.currentPage * pagination.limitItems}
+                                        |  của 
+                                        span.fw-bold #{pagination.totalItems}
+                                        |  sản phẩm
+                                .col-md-6.text-md-end
+                                    +pagination(pagination)
+
+    style.
+        .products-grid {
+            transition: all 0.3s ease;
+        }
+        
+        .products-grid.list-view .product-item {
+            display: flex;
+            flex-direction: row;
+        }
+        
+        .product-item {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+    script.
+        // Xử lý thông báo alert
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý tự động tắt alert
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                let timer;
+                
+                timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    progressBar.style.width = percentage + '%';
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft);
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+            
+            // Xử lý chế độ xem (grid/list)
+            const gridViewBtn = document.getElementById('grid-view');
+            const listViewBtn = document.getElementById('list-view');
+            
+            if (gridViewBtn && listViewBtn) {
+                gridViewBtn.addEventListener('click', function() {
+                    gridViewBtn.classList.add('active');
+                    listViewBtn.classList.remove('active');
+                    document.querySelector('.products-grid').classList.add('grid-view');
+                    document.querySelector('.products-grid').classList.remove('list-view');
+                });
+                
+                listViewBtn.addEventListener('click', function() {
+                    listViewBtn.classList.add('active');
+                    gridViewBtn.classList.remove('active');
+                    document.querySelector('.products-grid').classList.add('list-view');
+                    document.querySelector('.products-grid').classList.remove('grid-view');
+                });
+            }
+        });
+        
+        // Hàm xử lý sắp xếp
+        function applySorting() {
+            const sortSelect = document.getElementById('sortSearch');
+            const sortValue = sortSelect.value;
+            
+            // Lấy URL hiện tại và phân tích query parameters
+            const currentUrl = new URL(window.location.href);
+            const searchParams = currentUrl.searchParams;
+            
+            // Cập nhật hoặc thêm tham số sort
+            searchParams.set('sort', sortValue);
+            
+            // Giữ lại keyword
+            if (!searchParams.has('keyword')) {
+                searchParams.set('keyword', '');
+            }
+            
+            // Chuyển hướng đến URL mới
+            window.location.href = currentUrl.toString();
+        }
+        
+        // Giữ nguyên trạng thái sắp xếp khi tải trang
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortType = urlParams.get('sort');
+            
+            if(sortType) {
+                const sortSelect = document.getElementById('sortSearch');
+                if(sortSelect) {
+                    sortSelect.value = sortType;
+                }
+            }
+        });

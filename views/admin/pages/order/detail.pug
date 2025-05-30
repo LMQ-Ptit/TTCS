@@ -1,0 +1,215 @@
+extends ../../layouts/default.pug
+block main 
+    // Header
+    .d-flex.justify-content-between.align-items-center.mb-4
+        h1.mb-0
+            i.fas.fa-file-invoice.text-primary.me-2
+            | Chi tiết đơn hàng
+        .d-flex.gap-2
+            a.btn.btn-outline-secondary(href="/admin/order")
+                i.fas.fa-arrow-left.me-2
+                | Quay lại
+            
+    
+    // Thẻ trạng thái
+    if order.status === "ongoing"
+        .alert.alert-warning.d-flex.align-items-center.mb-4
+            i.fas.fa-clock.fa-lg.me-3
+            div
+                strong Đơn hàng đang xử lý 
+                | - Đơn hàng đã được nhận và đang chờ xử lý
+    else
+        .alert.alert-success.d-flex.align-items-center.mb-4
+            i.fas.fa-check-circle.fa-lg.me-3
+            div
+                strong Đơn hàng đã xử lý 
+                | - Đơn hàng đã hoàn tất và được giao thành công
+
+    .row
+        // Thông tin đơn hàng bên trái
+        .col-lg-8
+            // Thông tin cơ bản
+            .card.shadow-sm.mb-4
+                .card-header.bg-white.d-flex.justify-content-between.align-items-center
+                    h5.card-title.mb-0
+                        i.fas.fa-shopping-bag.text-primary.me-2
+                        | Thông tin đơn hàng
+                    .badge.bg-primary.rounded-pill #{new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                
+                .card-body
+                    .row.mb-3
+                        .col-md-6
+                            .mb-3
+                                label.text-muted.d-block Mã đơn hàng
+                                .fw-bold #{order._id}
+                            
+                            .mb-3
+                                label.text-muted.d-block Ngày đặt hàng
+                                .fw-bold #{new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                                .text-muted.small #{new Date(order.createdAt).toLocaleTimeString('vi-VN')}
+                        
+                        .col-md-6
+                            .mb-3
+                                label.text-muted.d-block Trạng thái
+                                if order.status === "ongoing"
+                                    .badge.bg-warning.p-2
+                                        i.fas.fa-clock.me-1
+                                        | Đang xử lý
+                                else
+                                    .badge.bg-success.p-2
+                                        i.fas.fa-check-circle.me-1
+                                        | Đã xử lý
+                            
+                            .mb-3
+                                label.text-muted.d-block Tổng giá trị
+                                .fw-bold.fs-4.text-danger $#{Number(order.totalPrice).toLocaleString()}
+            
+            // Bảng sản phẩm
+            .card.shadow-sm.mb-4
+                .card-header.bg-white
+                    h5.card-title.mb-0
+                        i.fas.fa-box-open.text-primary.me-2
+                        | Danh sách sản phẩm
+                
+                .table-responsive
+                    table.table.table-hover.mb-0
+                        thead.bg-light
+                            tr
+                                th.py-3 Sản phẩm
+                                th.py-3.text-center Đơn giá
+                                th.py-3.text-center Số lượng
+                                th.py-3.text-end Thành tiền
+                        tbody
+                            if order.products && order.products.length > 0
+                                each item in order.products
+                                    tr
+                                        td
+                                            .d-flex.align-items-center
+                                                if item.productInfo && item.productInfo.thumbnail
+                                                    img.rounded.me-3(
+                                                        src=item.productInfo.thumbnail
+                                                        alt=item.productInfo.title
+                                                        style="width: 60px; height: 60px; object-fit: cover;"
+                                                    )
+                                                else
+                                                    .bg-light.rounded.me-3.d-flex.align-items-center.justify-content-center(style="width: 60px; height: 60px;")
+                                                        i.fas.fa-box.text-muted
+                                                
+                                                div
+                                                    h6.mb-0 #{item.productInfo ? item.productInfo.title : `Sản phẩm #${item.product_id}`}
+                                                    if item.productInfo && item.productInfo.product_category_id
+                                                        small.text-muted ID: #{item.product_id.toString().slice(-6)}
+                                        
+                                        td.text-center.align-middle
+                                            if item.productInfo && item.productInfo.price
+                                                if item.productInfo.discountPercentage
+                                                    .text-decoration-line-through.text-muted.small $#{item.productInfo.price.toLocaleString()}
+                                                    .text-danger $#{((item.productInfo.price * (100 - item.productInfo.discountPercentage)) / 100).toFixed(2)}
+                                                else
+                                                    | $#{item.productInfo.price.toLocaleString()}
+                                            else
+                                                | N/A
+                                        
+                                        td.text-center.align-middle
+                                            .badge.bg-secondary.p-2 #{item.quantity}
+                                        
+                                        td.text-end.align-middle.fw-bold
+                                            if item.productInfo && item.productInfo.price
+                                                if item.productInfo.discountPercentage
+                                                    | $#{((item.productInfo.price * (100 - item.productInfo.discountPercentage) / 100) * item.quantity).toFixed(2)}
+                                                else
+                                                    | $#{(item.productInfo.price * item.quantity).toLocaleString()}
+                                            else
+                                                | N/A
+            
+                // Card footer với tổng cộng
+                .card-footer.bg-white
+                    .row
+                        .col-md-7.col-8.text-end Tổng số lượng:
+                        .col-md-5.col-4.text-end.fw-bold #{order.products.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm
+                    
+                    .row.mt-2
+                        .col-md-7.col-8.text-end Tổng tiền hàng:
+                        .col-md-5.col-4.text-end.fw-bold $#{Number(order.totalPrice).toLocaleString()}
+                    
+                    .row.mt-2
+                        .col-md-7.col-8.text-end Phí vận chuyển:
+                        .col-md-5.col-4.text-end.text-success Miễn phí
+                    
+                    hr
+
+                    .row.mt-2
+                        .col-md-7.col-8.text-end.fw-bold.fs-5 Tổng thanh toán:
+                        .col-md-5.col-4.text-end.fw-bold.fs-5.text-danger $#{Number(order.totalPrice).toLocaleString()}
+
+        // Thông tin khách hàng bên phải
+        .col-lg-4
+            // Thông tin khách hàng
+            .card.shadow-sm.mb-4
+                .card-header.bg-white
+                    h5.card-title.mb-0
+                        i.fas.fa-user-circle.text-primary.me-2
+                        | Thông tin khách hàng
+                
+                .card-body
+                    ul.list-group.list-group-flush
+                        li.list-group-item.d-flex.p-0.py-3.border-0
+                            .text-primary.me-3
+                                i.fas.fa-user.fa-lg
+                            div
+                                .text-muted.small Họ và tên
+                                .fw-bold #{order.userInfo.fullName}
+                        
+                        li.list-group-item.d-flex.p-0.py-3.border-0
+                            .text-primary.me-3
+                                i.fas.fa-phone.fa-lg
+                            div
+                                .text-muted.small Số điện thoại
+                                .fw-bold #{order.userInfo.phone}
+                        
+                        li.list-group-item.d-flex.p-0.py-3.border-0
+                            .text-primary.me-3
+                                i.fas.fa-map-marker-alt.fa-lg
+                            div
+                                .text-muted.small Địa chỉ giao hàng
+                                .fw-bold #{order.userInfo.address}
+
+            // Thay đổi trạng thái
+            .card.shadow-sm.mb-4
+                .card-header.bg-white
+                    h5.card-title.mb-0
+                        i.fas.fa-tasks.text-primary.me-2
+                        | Thao tác đơn hàng
+                
+                .card-body
+                    .mb-3
+                        label.form-label Thay đổi trạng thái
+                        select.form-select.status-select(
+                            data-order-id=order._id 
+                            data-current-status=order.status
+                        )
+                            option(value="ongoing" selected=order.status === "ongoing") Đang xử lý
+                            option(value="finished" selected=order.status === "finished") Đã xử lý
+                    
+                    hr.my-4
+                    
+                    .d-grid.gap-2
+                        a.btn.btn-warning(href=`/admin/order/edit/${order._id}`)
+                            i.fas.fa-edit.me-2
+                            | Chỉnh sửa đơn hàng
+                        
+    
+    // Modal xác nhận xóa
+    #deleteModal.modal.fade(tabindex="-1")
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                .modal-header.bg-danger.text-white
+                    h5.modal-title
+                        i.fas.fa-exclamation-triangle.me-2
+                        | Xác nhận xóa đơn hàng
+                    button.btn-close.btn-close-white(data-bs-dismiss="modal")
+                .modal-body.p-4
+                    p.mb-0 Bạn có chắc chắn muốn xóa đơn hàng này không? Hành động này không thể hoàn tác.
+                .modal-footer
+                    button.btn.btn-secondary(data-bs-dismiss="modal") Hủy
+                    a#deleteLink.btn.btn-danger Xóa đơn hàng

@@ -1,0 +1,263 @@
+extends ../../layouts/default.pug
+
+block main
+    .container.py-5
+        .row
+            // Sidebar điều hướng
+            .col-lg-3.mb-4.mb-lg-0
+                .account-sidebar.card.border-0.shadow-sm.rounded-4.overflow-hidden
+                    .card-header.bg-primary.text-white.p-4
+                        .d-flex.align-items-center
+                            .account-avatar.position-relative
+                                if user.avatar
+                                    img.rounded-circle.border.border-3.border-white.shadow(
+                                        src=user.avatar
+                                        alt="Avatar"
+                                        style="width: 60px; height: 60px; object-fit: cover;"
+                                    )
+                                else
+                                    img.rounded-circle.border.border-3.border-white.shadow(
+                                        src='https://ui-avatars.com/api/?name='+user.fullName+'&background=random&color=fff'
+                                        alt="Avatar"
+                                        style="width: 60px; height: 60px; object-fit: cover;"
+                                    )
+                            .ms-3
+                                h5.mb-0.fw-bold #{user.fullName}
+                                p.text-white-50.mb-0 #{user.email}
+
+                    .list-group.list-group-flush
+                        a.list-group-item.list-group-item-action.active.d-flex.align-items-center(href="/user/info")
+                            i.fas.fa-user-circle.fa-fw.me-3
+                            | Thông tin tài khoản
+                        a.list-group-item.list-group-item-action.active.d-flex.align-items-center(href="/user/edit")
+                            i.fas.fa-edit.fa-fw.me-3
+                            | Chỉnh sửa thông tin
+                        a.list-group-item.list-group-item-action.d-flex.align-items-center(href="/cart")
+                            i.fas.fa-shopping-bag.fa-fw.me-3
+                            | Đơn hàng của tôi
+                        a.list-group-item.list-group-item-action.d-flex.align-items-center(href="/cart/history")
+                            i.fas.fa-heart.fa-fw.me-3
+                            | Lịch sử mua hàng
+                        
+                        a.list-group-item.list-group-item-action.d-flex.align-items-center(href="/user/logout")
+                            i.fas.fa-sign-out-alt.fa-fw.me-3
+                            | Đăng xuất
+
+            // Nội dung chính
+            .col-lg-9
+                // Thông báo
+                if messages.error || messages.success
+                    if messages.error
+                        .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                            i.fas.fa-exclamation-circle.me-2
+                            | #{messages.error}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+                    if messages.success
+                        .alert.alert-success.alert-dismissible.fade.show.position-relative
+                            i.fas.fa-check-circle.me-2
+                            | #{messages.success}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+                
+                // Card thông tin tài khoản
+                .card.border-0.shadow-sm.rounded-4.overflow-hidden
+                    .card-header.bg-gradient-primary.border-0.py-3
+                        .d-flex.justify-content-between.align-items-center
+                            h3.mb-0.text-primary
+                                i.fas.fa-user-circle.me-2
+                                | Thông tin tài khoản
+                            a.btn.btn-primary.btn-sm.rounded-pill.px-3(href="/user/edit")
+                                i.fas.fa-edit.me-2
+                                | Chỉnh sửa
+
+                    .card-body.p-4
+                        .row.mb-5.align-items-center
+                            .col-lg-4.text-center.mb-4.mb-lg-0
+                                .avatar-container.position-relative.mx-auto.mb-3
+                                    if user.avatar
+                                        img.rounded-circle.shadow.img-thumbnail.p-0.border-0(
+                                            src=user.avatar
+                                            alt="Avatar"
+                                            style="width: 180px; height: 180px; object-fit: cover;"
+                                        )
+                                    else
+                                        img.rounded-circle.shadow.img-thumbnail.p-0.border-0(
+                                            src='https://ui-avatars.com/api/?name='+user.fullName+'&background=random&color=fff&size=180'
+                                            alt="Avatar"
+                                            style="width: 180px; height: 180px; object-fit: cover;"
+                                        )
+                                    .avatar-overlay.rounded-circle.d-flex.align-items-center.justify-content-center
+                                        a.btn.btn-sm.btn-light.rounded-circle.shadow-sm(href="/user/edit" title="Thay đổi ảnh đại diện")
+                                            i.fas.fa-camera
+                                
+                                .account-status.mb-2
+                                    if user.status === "active"
+                                        span.badge.bg-success.rounded-pill.shadow-sm
+                                            i.fas.fa-check-circle.me-1
+                                            | Tài khoản đã xác thực
+                                    else
+                                        span.badge.bg-warning.rounded-pill.shadow-sm
+                                            i.fas.fa-exclamation-circle.me-1
+                                            | Chưa xác thực
+                                
+                                .account-since.text-muted.small
+                                    | Thành viên từ: 
+                                    if user.createdAt
+                                        | #{new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                                    else
+                                        | Không xác định
+                            
+                            .col-lg-8
+                                .info-container.bg-light.rounded-4.p-4
+                                    h5.text-primary.border-bottom.pb-2.mb-3
+                                        i.fas.fa-info-circle.me-2
+                                        | Thông tin cá nhân
+
+                                    .row.g-4.mb-3
+                                        .col-md-6
+                                            .info-group
+                                                label.text-muted.small.mb-1
+                                                    i.fas.fa-user.me-2
+                                                    | Họ và tên
+                                                .form-control-plaintext.bg-white.rounded.px-3.py-2.border.shadow-sm.fw-medium #{user.fullName}
+
+                                        .col-md-6
+                                            .info-group
+                                                label.text-muted.small.mb-1
+                                                    i.fas.fa-envelope.me-2
+                                                    | Email
+                                                    if user.emailVerified
+                                                        i.fas.fa-check-circle.text-success.ms-2(title="Email đã xác thực")
+                                                .form-control-plaintext.bg-white.rounded.px-3.py-2.border.shadow-sm.fw-medium #{user.email}
+
+                                        .col-md-6
+                                            .info-group
+                                                label.text-muted.small.mb-1
+                                                    i.fas.fa-phone.me-2
+                                                    | Số điện thoại
+                                                .form-control-plaintext.bg-white.rounded.px-3.py-2.border.shadow-sm.fw-medium
+                                                    if user.phone
+                                                        | #{user.phone}
+                                                    else
+                                                        span.text-muted.fst-italic Chưa cập nhật
+
+                                        
+
+                        
+
+    style.
+        .bg-gradient-primary {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        }
+        
+        .avatar-container {
+            width: 180px;
+            height: 180px;
+            overflow: hidden;
+        }
+        
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .avatar-container:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        .info-group {
+            margin-bottom: 15px;
+        }
+        
+        .account-sidebar .list-group-item {
+            border-left: 0;
+            border-right: 0;
+            padding: 1rem 1.5rem;
+        }
+        
+        .account-sidebar .list-group-item.active {
+            background-color: #f8f9fa;
+            color: #0d6efd;
+            border-color: #dee2e6;
+            font-weight: 600;
+        }
+        
+        .stats-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .list-group-item-action:hover {
+            background-color: #f8f9fa;
+            color: #0d6efd;
+        }
+        
+        .fw-medium {
+            font-weight: 500;
+        }
+        
+        @media (max-width: 992px) {
+            .avatar-container {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+    script.
+        // Xử lý tự động tắt alert
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    progressBar.style.width = percentage + '%';
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft);
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });

@@ -1,0 +1,156 @@
+/* Header */
+.header {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+.header .inner-logo img {
+    max-height: 80px;
+    max-width: 100%;
+}
+
+.header .inner-menu > ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.header .inner-menu > ul > li {
+    margin-left: 20px;
+}
+/* End Header */
+
+/* Footer */
+.footer {
+    border-top: 1px solid #ddd;
+    padding: 10px 0;
+    text-align: center;
+    background-color: #f1f1f1; /* Màu nền cho footer */
+    color: #333; /* Màu chữ cho footer */
+}
+/* End Footer */
+
+/* Styling cho container của tiêu đề (pageTitle) */
+.box-head {
+    text-align: center; /* Căn giữa nội dung */
+    background-color: #fafafa;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+.title-section {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 20px 0;
+    border-radius: 8px;
+}
+.inner-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+    margin-bottom: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+.inner-title .underline {
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: #007bff;
+}
+
+/* Styling cho tiêu đề (pageTitle) */
+.box-head .inner-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff;
+    margin: 0;
+}
+/* product-item */
+.product-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100%;
+}
+  
+.product-item .inner-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-bottom: 1px solid #ddd;
+}
+  
+.product-item .inner-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+
+.product-item .inner-content {
+    padding: 15px;
+}
+  
+.product-item .inner-content .inner-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+  
+.product-item .inner-content .inner-price-new {
+    font-size: 18px;
+    font-weight: 600;
+    color: green;
+}
+
+.product-item .inner-content {
+    padding: 15px;
+  }
+  
+.product-item .inner-content .inner-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+  
+.product-item .inner-content .inner-price-old {
+    font-size: 18px;
+    font-weight: 600;
+    color: red;
+    text-decoration: line-through;
+}
+  
+.product-item .inner-content .inner-price-new {
+    font-size: 18px;
+    font-weight: 600;
+    color: green;
+}
+  
+.product-item .inner-content .inner-discount {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    background: red;
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 8
+}  
+/* product-item */
+.container.my-4{
+    background-color: rgb(255, 252, 252);
+}
+
+
+
+
+                
+
+
+
+
+

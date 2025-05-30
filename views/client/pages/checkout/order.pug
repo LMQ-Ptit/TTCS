@@ -1,0 +1,174 @@
+extends ../../layouts/default.pug
+block main
+    // Hero section
+    .bg-success.text-white.py-5.mb-5
+        .container.text-center
+            .d-flex.justify-content-center.mb-3
+                .success-checkmark
+                    i.fas.fa-check-circle.fa-5x.text-white
+            h1.display-4.fw-bold Đặt hàng thành công!
+            p.lead.mb-0 Cảm ơn bạn đã mua sắm cùng chúng tôi
+    
+    .container.pb-5
+        .row.justify-content-center
+            .col-lg-8
+                // Thông tin đơn hàng
+                .card.border-0.shadow-sm.rounded-4.mb-4
+                    .card-header.bg-white.border-0.py-3
+                        .d-flex.justify-content-between.align-items-center
+                            h5.mb-0.fw-bold
+                                i.fas.fa-file-invoice.me-2
+                                | Thông tin đơn hàng
+                            .order-id.badge.bg-primary.rounded-pill.px-3.py-2 
+                                | Mã đơn hàng: #{order._id.toString().substring(order._id.toString().length - 10)}
+                    
+                    .card-body.p-4
+                        .row.mb-4
+                            .col-md-6
+                                h6.text-muted.mb-2 Thông tin người nhận
+                                h6.fw-bold.mb-1 #{order.userInfo.fullName}
+                                p.mb-0 #{order.userInfo.phone}
+                                p.mb-0 #{order.userInfo.address}
+                            .col-md-6.mt-3.mt-md-0
+                                h6.text-muted.mb-2 Thông tin giao hàng
+                                p.mb-1
+                                    i.fas.fa-truck.text-muted.me-2
+                                    | Giao hàng tiêu chuẩn
+                                p.mb-1
+                                    i.fas.fa-calendar-alt.text-muted.me-2
+                                    | Dự kiến giao: 3-5 ngày làm việc
+                                p.text-success.mb-0
+                                    i.fas.fa-check-circle.me-2
+                                    | Miễn phí vận chuyển
+                        
+                        hr.my-4
+                        
+                        .order-products
+                            each item, index in order.products
+                                if index > 0
+                                    hr.my-3
+                                .d-flex.py-2
+                                    .flex-shrink-0
+                                        img.rounded.shadow-sm(
+                                            src=item.productInfo.thumbnail
+                                            alt=item.productInfo.title
+                                            style="width: 80px; height: 80px; object-fit: cover;"
+                                        )
+                                    .flex-grow-1.ms-3
+                                        .row
+                                            .col-md-8
+                                                h5.mb-1 #{item.productInfo.title}
+                                                .d-flex.gap-3.text-muted
+                                                    div Đơn giá: #{new Intl.NumberFormat('vi-VN').format(item.productInfo.priceNew)}₫
+                                                    div Số lượng: #{item.quantity}
+                                            .col-md-4.text-end
+                                                .fw-bold.text-danger #{new Intl.NumberFormat('vi-VN').format(item.productInfo.priceNew * item.quantity)}₫
+                
+                // Chi tiết thanh toán
+                .card.border-0.shadow-sm.rounded-4.mb-4
+                    .card-header.bg-white.border-0.py-3
+                        h5.mb-0.fw-bold
+                            i.fas.fa-credit-card.me-2
+                            | Chi tiết thanh toán
+                    
+                    .card-body.p-4
+                        .d-flex.justify-content-between.mb-2
+                            span.text-muted Tạm tính:
+                            span.fw-bold #{new Intl.NumberFormat('vi-VN').format(order.totalPrice)}₫
+                        
+                        .d-flex.justify-content-between.mb-2
+                            span.text-muted Phí vận chuyển:
+                            span.text-success Miễn phí
+                        
+                        hr.my-3
+                        
+                        .d-flex.justify-content-between
+                            h5.mb-0 Tổng cộng:
+                            h4.mb-0.text-danger.fw-bold #{new Intl.NumberFormat('vi-VN').format(order.totalPrice)}₫
+                        
+                        .payment-method.bg-light.rounded.p-3.mt-3
+                            .d-flex.align-items-center
+                                i.fas.fa-money-bill-wave.fa-fw.text-success.me-3.fa-lg
+                                div
+                                    h6.fw-bold.mb-1 Thanh toán khi nhận hàng (COD)
+                                    p.text-muted.mb-0.small Vui lòng chuẩn bị số tiền mặt chính xác khi nhận hàng
+                
+                // Các bước tiếp theo
+                .card.border-0.shadow-sm.rounded-4.mb-4
+                    .card-header.bg-white.border-0.py-3
+                        h5.mb-0.fw-bold
+                            i.fas.fa-clipboard-list.me-2
+                            | Các bước tiếp theo
+                    
+                    .card-body.p-4
+                        .row
+                            .col-md-4.text-center.mb-3.mb-md-0
+                                .step-icon.mx-auto.mb-3
+                                    i.fas.fa-box.fa-2x
+                                h6.fw-bold Chuẩn bị đơn hàng
+                                p.text-muted.small.mb-0 Đơn hàng của bạn đang được xử lý
+                            
+                            .col-md-4.text-center.mb-3.mb-md-0
+                                .step-icon.mx-auto.mb-3
+                                    i.fas.fa-shipping-fast.fa-2x
+                                h6.fw-bold Vận chuyển
+                                p.text-muted.small.mb-0 Đơn hàng sẽ được giao trong 3-5 ngày
+                            
+                            .col-md-4.text-center
+                                .step-icon.mx-auto.mb-3
+                                    i.fas.fa-home.fa-2x
+                                h6.fw-bold Giao hàng
+                                p.text-muted.small.mb-0 Đơn hàng sẽ được giao đến địa chỉ của bạn
+                
+                // Các nút hành động
+                .d-flex.justify-content-center.gap-3.mt-4
+                    a.btn.btn-outline-secondary(href="/cart/history")
+                        i.fas.fa-history.me-2
+                        | Lịch sử đơn hàng
+                    a.btn.btn-primary(href="/products")
+                        i.fas.fa-shopping-bag.me-2
+                        | Tiếp tục mua sắm
+
+    style.
+        .success-checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .order-id {
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .step-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0d6efd;
+        }
+        
+        @media (max-width: 767.98px) {
+            .success-checkmark {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .success-checkmark i {
+                font-size: 3rem !important;
+            }
+            
+            h1.display-4 {
+                font-size: 2.5rem;
+            }
+        }

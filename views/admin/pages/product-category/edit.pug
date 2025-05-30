@@ -1,0 +1,223 @@
+extends ../../layouts/default.pug
+block main
+    // Header
+    .d-flex.justify-content-between.align-items-center.mb-4
+        h1.text-primary.mb-0
+            i.fas.fa-edit.me-2
+            | Chỉnh sửa danh mục
+        
+        a.btn.btn-outline-secondary(href="/admin/products-category")
+            i.fas.fa-arrow-left.me-2
+            | Quay lại danh sách
+    
+    .card-body.p-4
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                i.fas.fa-exclamation-circle.me-2
+                | #{messages.error}
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative
+                i.fas.fa-check-circle.me-2
+                | #{messages.success}
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+    
+    // Form chỉnh sửa
+    .row
+        .col-lg-8
+            .card.shadow-sm.border-0.mb-4
+                .card-header.bg-white.py-3
+                    h5.card-title.mb-0
+                        i.fas.fa-pen.text-primary.me-2
+                        | Thông tin danh mục
+
+                .card-body
+                    form(
+                        action=`/admin/products-category/edit/${productCategory._id}?_method=PATCH`
+                        method="POST"
+                        enctype='multipart/form-data',
+                        class="needs-validation"
+                    )
+                        // Tên danh mục
+                        .mb-3
+                            label.form-label.fw-semibold(for="title") Tên danh mục*
+                            input.form-control#title(
+                                type="text"
+                                name="title"
+                                value=productCategory.title
+                                required
+                                placeholder="Nhập tên danh mục"
+                            )
+                        
+                        // Slug URL
+                        .mb-3
+                            label.form-label.fw-semibold(for="slug") Đường dẫn (slug)
+                            .input-group
+                                span.input-group-text /danh-muc/
+                                input.form-control#slug(
+                                    type="text"
+                                    name="slug"
+                                    value=productCategory.slug
+                                    placeholder="ten-danh-muc"
+                                )
+                            .form-text.text-muted Để trống để tự động tạo từ tên danh mục
+                        
+                       
+                        
+                        // Vị trí
+                        .mb-3
+                            label.form-label.fw-semibold(for="position") Vị trí
+                            input.form-control#position(
+                                type="number"
+                                name="position"
+                                value=productCategory.position || ""
+                                min="1"
+                                placeholder="Nhập vị trí hiển thị"
+                            )
+                            .form-text.text-muted Để trống để tự động xếp vị trí cuối cùng
+                        
+                        // Mô tả
+                        .mb-3
+                            label.form-label.fw-semibold(for="description") Mô tả
+                            textarea.form-control#description(
+                                name="description"
+                                rows="3"
+                                placeholder="Nhập mô tả danh mục (không bắt buộc)"
+                            ) #{productCategory.description || ""}
+                        
+                                                
+                        .mb-3
+                            label.form-label.fw-semibold(for="thumbnail") Hình ảnh danh mục
+                            .text-center.mb-3
+                                img#preview-image.img-fluid.rounded.shadow-sm(
+                                    src=productCategory.thumbnail || "/images/default-category.jpg"
+                                    alt=productCategory.title
+                                    style="max-height: 200px; object-fit: contain;"
+                                )
+                            input.form-control(
+                                type="file"
+                                id="thumbnail"
+                                name="thumbnail"
+                                accept="image/*"
+                            )
+                            .form-text.small.text-muted Để trống nếu không muốn thay đổi ảnh đại diện
+                            .form-text.text-muted Chỉ hỗ trợ định dạng JPG, PNG, GIF và dung lượng tối đa 2MB
+                        // Trạng thái và tùy chọn hiển thị
+                        .row
+                            .col-md-6
+                                .mb-3
+                                    label.form-label.fw-semibold(for="status") Trạng thái
+                                    select.form-select#status(name="status")
+                                        option(value="active" selected=productCategory.status === "active") Hoạt động
+                                        option(value="inactive" selected=productCategory.status === "inactive") Không hoạt động
+                            
+                            
+                        
+                        .d-flex.justify-content-end.mt-4
+                            a.btn.btn-secondary.me-2(href=`/admin/products-category/detail/${productCategory._id}`)
+                                i.fas.fa-times.me-2
+                                | Hủy
+                            button.btn.btn-primary(type="submit")
+                                i.fas.fa-save.me-2
+                                | Lưu thay đổi
+
+        .col-lg-4
+            // Thông tin trợ giúp
+            .card.shadow-sm.border-0.mb-4
+                .card-header.bg-white.py-3
+                    h5.card-title.mb-0
+                        i.fas.fa-info-circle.text-primary.me-2
+                        | Thông tin bổ sung
+                
+                .card-body
+                    .alert.alert-info.mb-3
+                        h6.alert-heading.mb-2
+                            i.fas.fa-lightbulb.me-2
+                            | Mẹo
+                        p.mb-0 Chọn danh mục cha để tạo cấu trúc phân cấp cho danh mục sản phẩm của bạn.
+                    
+                    .alert.alert-warning.mb-0
+                        h6.alert-heading.mb-2
+                            i.fas.fa-exclamation-triangle.me-2
+                            | Lưu ý
+                        p.mb-0 Việc thay đổi slug có thể ảnh hưởng đến các liên kết hiện có trỏ đến danh mục này.
+
+            // Thông tin kỹ thuật
+            .card.shadow-sm.border-0
+                .card-header.bg-white.py-3
+                    h5.card-title.mb-0
+                        i.fas.fa-code.text-primary.me-2
+                        | Thông tin kỹ thuật
+                
+                .list-group.list-group-flush
+                    .list-group-item
+                        .small.text-muted ID Danh mục
+                        code.d-block.mt-1 #{productCategory._id}
+                    
+                    .list-group-item
+                        .small.text-muted Ngày tạo
+                        .mt-1 #{new Date(productCategory.createdAt).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                    
+                    if productCategory.updatedAt
+                        .list-group-item
+                            .small.text-muted Cập nhật lần cuối
+                            .mt-1 #{new Date(productCategory.updatedAt).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+    script.
+         // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });
+
+
+

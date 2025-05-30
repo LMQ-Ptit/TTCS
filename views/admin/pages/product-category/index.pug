@@ -1,0 +1,395 @@
+extends ../../layouts/default.pug
+include ../../mixin/pagination.pug
+
+block main
+    .container-fluid.py-4
+        // Header khu vực tiêu đề và breadcrumbs
+        .d-flex.flex-wrap.justify-content-between.align-items-center.mb-4
+            .page-title-wrapper
+                h4.text-primary.mb-1
+                    i.fas.fa-folder-tree.me-2
+                    | Quản lý Danh mục Sản phẩm
+                nav(aria-label="breadcrumb")
+                    ol.breadcrumb.mb-0
+                        li.breadcrumb-item
+                            a(href="/admin/dashboard")
+                                i.fas.fa-home.text-primary.me-1
+                                | Trang chủ
+                        li.breadcrumb-item.active(aria-current="page") Danh mục sản phẩm
+
+        // Khu vực thông báo
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-danger.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-exclamation-circle.me-3.text-danger.fa-lg
+                    .flex-grow-1= messages.error
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-success.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-check-circle.me-3.text-success.fa-lg
+                    .flex-grow-1= messages.success
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        
+        // Toolbar với tìm kiếm và nút thêm mới
+        .card.border-0.shadow-sm.mb-4
+            .card-body
+                .row.g-3.align-items-center
+                    .col-lg-7.col-md-6
+                        form#form-search.d-flex
+                            .input-group
+                                span.input-group-text.bg-light.border-end-0
+                                    i.fas.fa-search.text-muted
+                                input.form-control.border-start-0.ps-0(
+                                    type="text"
+                                    placeholder="Tìm kiếm danh mục..."
+                                    name="keyword"
+                                    value=keyword || ""
+                                )
+                                button.btn.btn-primary(type="submit") Tìm kiếm
+                    
+                    .col-lg-5.col-md-6
+                        .d-flex.justify-content-md-end
+                            a.btn.btn-primary.d-flex.align-items-center(href="/admin/products-category/create")
+                                i.fas.fa-plus-circle.me-2
+                                | Thêm danh mục mới
+
+        // Bảng danh mục
+        .card.border-0.shadow-sm.mb-4
+            .card-header.bg-white.d-flex.justify-content-between.align-items-center.py-3
+                h5.card-title.mb-0
+                    i.fas.fa-list-ul.text-primary.me-2
+                    | Danh sách danh mục
+                
+                .dropdown
+                    button.btn.btn-outline-secondary.btn-sm.dropdown-toggle(type="button" data-bs-toggle="dropdown" aria-expanded="false")
+                        i.fas.fa-filter.me-1
+                        | Lọc trạng thái
+                    ul.dropdown-menu.dropdown-menu-end.shadow-sm
+                        li
+                            a.dropdown-item(href="/admin/products-category") Tất cả
+                        li
+                            a.dropdown-item(href="/admin/products-category?status=active") Đang hoạt động
+                        li
+                            a.dropdown-item(href="/admin/products-category?status=inactive") Không hoạt động
+            
+            .card-body.p-0
+                .table-responsive
+                    table.table.table-hover.align-middle.mb-0
+                        thead.bg-light
+                            tr
+                                th.text-center(width="5%") #
+                                th(width="15%") Hình ảnh
+                                th(width="25%") Tiêu đề
+                                th.text-center.d-none.d-md-table-cell(width="15%") Danh mục cha
+                                th.text-center(width="10%") Vị trí
+                                th.text-center(width="10%") Trạng thái
+                                th.text-center(width="20%") Thao tác
+                        
+                        tbody
+                            if productCategories.length === 0
+                                tr
+                                    td.text-center.py-5(colspan="7")
+                                        .text-muted
+                                            i.fas.fa-folder-open.fa-3x.mb-3.d-block
+                                            p.mb-0 Không tìm thấy danh mục nào
+                            else
+                                each product, index in productCategories
+                                    tr(class=product.status === 'inactive' ? 'table-secondary' : '')
+                                        td.text-center #{(pagination.currentPage - 1) * pagination.limitItems + index + 1}
+                                        
+                                        td
+                                            .category-thumbnail.rounded.overflow-hidden.border.shadow-sm.mx-auto(style="width: 80px; height: 80px")
+                                                if product.thumbnail
+                                                    img.img-fluid(
+                                                        src=product.thumbnail
+                                                        alt=product.title
+                                                        style="width: 100%; height: 100%; object-fit: cover;"
+                                                    )
+                                                else
+                                                    .bg-light.d-flex.align-items-center.justify-content-center.h-100
+                                                        i.fas.fa-folder.text-muted.fa-2x
+                                        
+                                        td
+                                            .category-info
+                                                a.category-title.text-decoration-none.fw-bold.d-block.mb-1(href=`/admin/products-category/detail/${product.id}`)
+                                                    | #{product.title}
+                                                small.text-muted.d-block.text-truncate(style="max-width: 200px;")
+                                                    i.fas.fa-link.me-1
+                                                    | #{product.slug || "—"}
+                                        
+                                        td.text-center.d-none.d-md-table-cell
+                                            if product.parent_id
+                                                // Tìm tên danh mục cha từ ID trong tất cả danh mục
+                                                - let parentCategory = allCategories.find(cat => cat._id.toString() === product.parent_id.toString())
+                                                if parentCategory
+                                                    a.text-decoration-none(href=`/admin/products-category/detail/${parentCategory._id}`)
+                                                        | #{parentCategory.title}
+                                                else
+                                                    span.text-muted Không tìm thấy
+                                            else
+                                                span.text-muted —
+                                        
+                                        td.text-center
+                                            span.badge.rounded-pill.bg-light.text-dark.fw-normal.px-3.py-2
+                                                | #{product.position || "—"}
+                                        
+                                        td.text-center
+                                            if(product.status == "active")
+                                                button.badge.rounded-pill.bg-success-subtle.text-success.border-0.px-3.py-2(
+                                                    button-change-status 
+                                                    data-status="active"
+                                                    data-id=product.id
+                                                )
+                                                    i.fas.fa-check-circle.me-1
+                                                    | Hoạt động
+                                            else 
+                                                button.badge.rounded-pill.bg-danger-subtle.text-danger.border-0.px-3.py-2(
+                                                    button-change-status
+                                                    data-status="inactive"
+                                                    data-id=product.id
+                                                )
+                                                    i.fas.fa-ban.me-1
+                                                    | Đã ẩn
+                                        
+                                        td.text-center
+                                            .action-buttons
+                                                a.btn.btn-sm.btn-outline-info.me-1.action-btn(
+                                                    href=`/admin/products-category/detail/${product.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Chi tiết"
+                                                )
+                                                    i.fas.fa-eye
+                                                
+                                                a.btn.btn-sm.btn-outline-warning.me-1.action-btn(
+                                                    href=`/admin/products-category/edit/${product.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Sửa"
+                                                )
+                                                    i.fas.fa-edit
+                                                
+                                                a.btn.btn-sm.btn-outline-danger.action-btn(
+                                                    href=`/admin/products-category/delete/${product.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Xóa"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này không?');"
+                                                )
+                                                    i.fas.fa-trash-alt
+            
+            // Footer phân trang
+            .card-footer.bg-white.py-3
+                .row.align-items-center
+                    .col-md-6.text-muted
+                        .d-flex.align-items-center
+                            i.fas.fa-info-circle.me-2
+                            | Hiển thị #{pagination.limitItems} / #{pagination.totalItems} danh mục
+                    .col-md-6
+                        +pagination(pagination)
+
+    //- // Form ẩn cho thay đổi trạng thái
+    //- form#form-change-status(action="" method="POST" data-path="/admin/products-category/change-status")
+
+    style.
+        /* Thiết kế nâng cao */
+        .page-title-wrapper {
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+        }
+        
+        .breadcrumb {
+            font-size: 0.85rem;
+        }
+        
+        /* Hiệu ứng cho thumbnail */
+        .category-thumbnail {
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+        
+        .category-thumbnail img {
+            transition: transform 0.3s ease;
+        }
+        
+        .category-thumbnail:hover img {
+            transform: scale(1.1);
+        }
+        
+        /* Hiệu ứng cho tiêu đề */
+        .category-title {
+            color: #2a5298;
+            transition: all 0.2s;
+        }
+        
+        .category-title:hover {
+            color: #0d6efd;
+            text-decoration: underline !important;
+        }
+        
+        /* Nút trạng thái */
+        .badge {
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        button.badge {
+            cursor: pointer;
+        }
+        
+        button.badge:hover {
+            opacity: 0.8;
+        }
+        
+        /* Nút thao tác */
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Hiệu ứng cho cảnh báo */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        
+        .alert {
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        /* Màu sắc cho trạng thái */
+        .bg-success-subtle {
+            background-color: rgba(25, 135, 84, 0.15) !important;
+        }
+        
+        .text-success {
+            color: #198754 !important;
+        }
+        
+        .bg-danger-subtle {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        
+        /* Hiệu ứng cho hàng bảng */
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        .table th {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Xử lý thay đổi trạng thái
+            const buttonsChangeStatus = document.querySelectorAll('[button-change-status]');
+            const formChangeStatus = document.getElementById('form-change-status');
+            
+            if (buttonsChangeStatus.length > 0 && formChangeStatus) {
+                const path = formChangeStatus.getAttribute("data-path");
+                
+                buttonsChangeStatus.forEach(button => {
+                    button.addEventListener("click", function() {
+                        const statusCurrent = this.dataset.status;
+                        const id = this.dataset.id;
+                        
+                        // Xác định trạng thái mới
+                        const statusChange = statusCurrent === "active" ? "inactive" : "active";
+                        
+                        // Xác nhận trước khi thay đổi
+                        const statusText = statusCurrent === "active" ? "ẩn" : "hiện";
+                        if (confirm(`Bạn có chắc chắn muốn ${statusText} danh mục này không?`)) {
+                            // Cập nhật action của form và submit
+                            const action = `${path}/${statusChange}/${id}`;
+                            formChangeStatus.action = action;
+                            formChangeStatus.submit();
+                        }
+                    });
+                });
+            }
+            
+            // Tự động tắt thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                let timer;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });

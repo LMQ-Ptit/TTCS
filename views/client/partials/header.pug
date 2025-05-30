@@ -1,0 +1,117 @@
+//- sticky-top: khi cuộn xuống dưới thì header sẽ dính ở trên cùng của trình duyệt
+//-position-relative: cho phần tử con sử dụng position: relative
+//-position-absolute: cho phần tử con sử dụng position: absolute
+//-rounded-pill: bo tròn góc
+header.header.bg-dark.sticky-top
+    .container
+        .row.align-items-center.py-3
+            .col-lg-2.col-md-3.col-6
+                .logo
+                    a(href="/")
+                        img(src="/images/logo.png" alt="Logo" width="80px")
+            .col-lg-5.col-md-4
+                form.search-form(action="/search" method="GET")
+                    .input-group
+                        input.form-control(
+                            type="text"
+                            placeholder="Tìm kiếm sản phẩm..."
+                            name="keyword"
+                            value=keyword
+                        )
+                        button.btn.btn-light(type="submit")
+                            i.fas.fa-search Tìm kiếm
+                        button.btn.btn-primary.ms-2#image-search-btn(type="button" data-bs-toggle="modal" data-bs-target="#imageSearchModal")
+                            i.fas.fa-camera
+
+            .col-lg-5.col-md-5.col-6
+                .d-flex.justify-content-end.align-items-center
+                    a.btn.btn-outline-light.me-2(href="/products")
+                        i.fas.fa-sign-in-alt.me-2.d-none.d-md-inline
+                        | Sản phẩm
+                    if user
+                        a.btn.btn-outline-light.me-2(href="/cart")
+                                i.fas.fa-sign-in-alt.me-2.d-none.d-md-inline
+                                | Gỉỏ hàng
+                        .d-flex
+                            a.btn.btn-outline-light.me-2(href="/user/info")
+                                i.fas.fa-sign-in-alt.me-2.d-none.d-md-inline
+                                | #{user.fullName}
+                            a.btn.btn-light(href="/user/logout")
+                                i.fas.fa-user-plus.me-2.d-none.d-md-inline
+                                | Đăng Xuất
+                    else
+                        .d-flex
+                            a.btn.btn-outline-light.me-2(href="/user/login")
+                                i.fas.fa-sign-in-alt.me-2.d-none.d-md-inline
+                                | Đăng nhập
+                            a.btn.btn-light(href="/user/register")
+                                i.fas.fa-user-plus.me-2.d-none.d-md-inline
+                                | Đăng ký
+block append body
+    // Modal tìm kiếm bằng hình ảnh
+    #imageSearchModal.modal.fade(tabindex="-1" aria-labelledby="imageSearchModalLabel" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                .modal-header
+                    h5.modal-title#imageSearchModalLabel
+                        i.fas.fa-camera.me-2
+                        | Tìm kiếm bằng hình ảnh
+                    button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+                .modal-body
+                    form(action="/search/image" method="POST" enctype="multipart/form-data")
+                        .text-center.mb-3
+                            .image-preview-container
+                                img#image-preview.img-fluid.rounded.shadow-sm.d-none(
+                                    src=""
+                                    alt="Preview"
+                                    style="max-height: 200px; object-fit: contain;"
+                                )
+                        .mb-3
+                            label.form-label(for="imageSearch") Chọn ảnh để tìm kiếm
+                            input#imageSearch.form-control(
+                                type="file"
+                                name="imageSearch"
+                                accept="image/*"
+                                required
+                            )
+                            .form-text.text-muted Hỗ trợ định dạng: JPG, PNG, GIF, WEBP (tối đa 5MB)
+                        .d-grid.gap-2
+                            button.btn.btn-primary(type="submit")
+                                i.fas.fa-search.me-2
+                                | Tìm kiếm sản phẩm tương tự
+                            button.btn.btn-light(type="button" data-bs-dismiss="modal") Hủy
+
+    script.
+        // Script xem trước ảnh khi upload
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('imageSearch');
+            const imagePreview = document.getElementById('image-preview');
+            
+            if(imageInput && imagePreview) {
+                imageInput.addEventListener('change', function() {
+                    if(this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            imagePreview.src = e.target.result;
+                            imagePreview.classList.remove('d-none');
+                        }
+                        
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+            }
+        });
+
+block append style
+    style.
+        .header {
+            background-color: #404040;  /* Màu đen nhạt hơn */
+            box-shadow: 0 2px 4px rgba(84, 59, 59, 0.99);
+        }
+        .header .btn {
+            transition: all 0.3s;
+        }
+        .header .btn:hover {
+            transform: translateY(-2px);
+        }

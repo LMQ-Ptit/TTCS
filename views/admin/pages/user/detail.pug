@@ -1,0 +1,327 @@
+extends ../../layouts/default.pug
+
+block main
+    .container-fluid.py-4
+        // Header khu vực tiêu đề và breadcrumbs
+        .d-flex.flex-wrap.justify-content-between.align-items-center.mb-4
+            .page-title-wrapper
+                h4.text-primary.mb-1
+                    i.fas.fa-user-circle.me-2
+                    | Chi tiết Người dùng
+                nav(aria-label="breadcrumb")
+                    ol.breadcrumb.mb-0
+                        li.breadcrumb-item
+                            a(href="/admin/dashboard")
+                                i.fas.fa-home.text-primary.me-1
+                                | Trang chủ
+                        li.breadcrumb-item
+                            a(href="/admin/user")
+                                i.fas.fa-users.text-primary.me-1
+                                | Người dùng
+                        li.breadcrumb-item.active(aria-current="page") #{user.fullName}
+            
+            .action-buttons.d-flex.gap-2
+                a.btn.btn-outline-primary(href=`/admin/user/edit/${user._id}`)
+                    i.fas.fa-edit.me-2
+                    | Chỉnh sửa
+                a.btn.btn-outline-danger(href=`/admin/user/delete/${user._id}` onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này không?');")
+                    i.fas.fa-trash-alt.me-2
+                    | Xóa
+                a.btn.btn-outline-secondary(href="/admin/user")
+                    i.fas.fa-arrow-left.me-2
+                    | Quay lại
+
+        // Hiển thị thông báo nếu có
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-danger.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-exclamation-circle.me-3.text-danger.fa-lg
+                    .flex-grow-1= messages.error
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-success.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-check-circle.me-3.text-success.fa-lg
+                    .flex-grow-1= messages.success
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        // Thông tin người dùng
+        .row
+            // Thông tin cơ bản và avatar
+            .col-lg-4.mb-4
+                .card.border-0.shadow-sm.rounded-3.h-100
+                    .card-header.bg-gradient-primary.text-white.py-3
+                        h5.card-title.mb-0
+                            i.fas.fa-id-card.me-2
+                            | Thông tin cá nhân
+                    
+                    .card-body.text-center.py-4
+                        .avatar-container.position-relative.mx-auto.mb-4
+                            if user.avatar
+                                img.rounded-circle.img-thumbnail.border-primary.shadow(
+                                    src=user.avatar
+                                    alt=user.fullName
+                                    style="width: 180px; height: 180px; object-fit: cover;"
+                                )
+                            else
+                                .avatar-placeholder.rounded-circle.bg-light.border.border-2.border-primary.d-flex.align-items-center.justify-content-center.mx-auto(
+                                    style="width: 180px; height: 180px;"
+                                )
+                                    i.fas.fa-user.fa-5x.text-primary
+                        
+                        // Thông tin cơ bản
+                        h4.fw-bold.mb-1 #{user.fullName}
+                        p.text-muted.mb-3
+                            i.fas.fa-envelope.me-2
+                            | #{user.email}
+
+                        // Trạng thái tài khoản
+                        if user.status === "active"
+                            .badge.bg-success-subtle.text-success.py-2.px-3.rounded-pill.fs-6.mb-3
+                                i.fas.fa-check-circle.me-1
+                                | Đang hoạt động
+                        else
+                            .badge.bg-danger-subtle.text-danger.py-2.px-3.rounded-pill.fs-6.mb-3
+                                i.fas.fa-ban.me-1
+                                | Đã bị khóa
+                        
+                        // Thời gian tham gia
+                        p.text-muted.mb-0
+                            i.fas.fa-calendar-alt.me-2
+                            | Tham gia: 
+                            if user.createdAt
+                                span.fw-medium #{new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                            else
+                                span.fw-medium Không có dữ liệu
+                    
+                    .card-footer.bg-light.py-3
+                        .d-flex.justify-content-around
+                            a.btn.btn-sm.btn-outline-primary(href=`/admin/user/edit/${user._id}`)
+                                i.fas.fa-edit.me-2
+                                | Chỉnh sửa
+                            
+            
+            // Thông tin chi tiết và đơn hàng
+            .col-lg-8
+                // Thông tin chi tiết
+                .card.border-0.shadow-sm.rounded-3.mb-4
+                    .card-header.bg-white.py-3.d-flex.justify-content-between.align-items-center
+                        h5.card-title.mb-0.text-primary
+                            i.fas.fa-info-circle.me-2
+                            | Thông tin chi tiết
+                        //- if user.status === "active"
+                        //-     button.btn.btn-sm.btn-danger(
+                        //-         onclick=`if(confirm('Bạn có chắc chắn muốn khóa tài khoản này?')) window.location.href='/admin/user/change-status/inactive/${user._id}'`
+                        //-     )
+                        //-         i.fas.fa-ban.me-1
+                        //-         | Khóa tài khoản
+                        //- else
+                        //-     button.btn.btn-sm.btn-success(
+                        //-         onclick=`if(confirm('Bạn có chắc chắn muốn kích hoạt tài khoản này?')) window.location.href='/admin/user/change-status/active/${user._id}'`
+                        //-     )
+                        //-         i.fas.fa-check-circle.me-1
+                        //-         | Kích hoạt
+                    
+                    .card-body
+                        .row.g-4
+                            .col-md-6
+                                .info-group
+                                    label.text-muted.small.mb-1
+                                        i.fas.fa-phone.me-2
+                                        | Số điện thoại
+                                    .form-control-plaintext.fw-medium
+                                        if user.phone
+                                            | #{user.phone}
+                                        else
+                                            span.text-muted.fst-italic Chưa cập nhật
+                            
+                            .col-md-6
+                                .info-group
+                                    label.text-muted.small.mb-1
+                                        i.fas.fa-shield-alt.me-2
+                                        | Trạng thái xác thực
+                                    .form-control-plaintext
+                                        if user.status === "active"
+                                            span.badge.bg-success.text-white.rounded-pill.px-3
+                                                i.fas.fa-check-circle.me-1
+                                                | Đã xác thực
+                                        else
+                                            span.badge.bg-warning.text-white.rounded-pill.px-3
+                                                i.fas.fa-exclamation-circle.me-1
+                                                | Chưa xác thực
+                            
+                            .col-md-6
+                                .info-group
+                                    label.text-muted.small.mb-1
+                                        i.fas.fa-clock.me-2
+                                        | Lần cập nhật cuối
+                                    .form-control-plaintext.fw-medium
+                                        if user.updatedAt
+                                            | #{new Date(user.updatedAt).toLocaleString('vi-VN')}
+                                        else
+                                            span.text-muted.fst-italic Chưa cập nhật
+                            
+                            .col-md-6
+                                .info-group
+                                    label.text-muted.small.mb-1
+                                        i.fas.fa-fingerprint.me-2
+                                        | ID người dùng
+                                    .form-control-plaintext.fw-medium.text-truncate
+                                        code #{user._id}
+                
+                // Lịch sử đơn hàng
+                .card.border-0.shadow-sm.rounded-3
+                    .card-header.bg-white.py-3
+                        h5.card-title.mb-0.text-primary
+                            i.fas.fa-shopping-cart.me-2
+                            | Lịch sử đơn hàng
+                    
+                    .card-body
+                        .text-center.py-4
+                            i.fas.fa-history.fa-3x.text-muted.mb-3
+                            h5.text-muted Chức năng đang phát triển
+                            p.text-muted.small Lịch sử đơn hàng của người dùng sẽ hiển thị tại đây
+
+    style.
+        /* Gradient background cho header card */
+        .bg-gradient-primary {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+        }
+        
+        /* Styling cho các badge và status */
+        .bg-success-subtle {
+            background-color: rgba(25, 135, 84, 0.15) !important;
+        }
+        
+        .bg-danger-subtle {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+        }
+        
+        .text-success {
+            color: #198754 !important;
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        
+        /* Styling cho avatar */
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-container img {
+            border: 5px solid white;
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-container:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Styling cho các group thông tin */
+        .info-group {
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-group label {
+            margin-bottom: 0.25rem;
+            color: #6c757d;
+        }
+        
+        .info-group .form-control-plaintext {
+            padding: 0.375rem 0;
+        }
+        
+        /* Hoạt ảnh cho alert */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        
+        .alert {
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        /* Title bar styling */
+        .page-title-wrapper {
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+        }
+        
+        /* Card styling */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+
+    script.
+        // Khởi tạo tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Tự động tắt thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                let timer;
+                
+                timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    progressBar.style.width = percentage + '%';
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Khi di chuột vào thông báo, dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });

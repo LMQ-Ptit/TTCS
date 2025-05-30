@@ -1,0 +1,354 @@
+extends ../../layouts/default.pug
+include ../../mixin/search.pug
+include ../../mixin/pagination.pug
+
+block main
+    .container-fluid.py-4
+        // Header khu vực tiêu đề và breadcrumbs
+        .d-flex.flex-wrap.justify-content-between.align-items-center.mb-4
+            .page-title-wrapper
+                h4.text-primary.mb-1
+                    i.fas.fa-users.me-2
+                    | Quản lý Tài khoản Người dùng
+                nav(aria-label="breadcrumb")
+                    ol.breadcrumb.mb-0
+                        li.breadcrumb-item
+                            a(href="/admin/dashboard")
+                                i.fas.fa-home.text-primary.me-1
+                                | Trang chủ
+                        li.breadcrumb-item.active(aria-current="page") Người dùng
+
+        // Khu vực thông báo
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-danger.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-exclamation-circle.me-3.text-danger.fa-lg
+                    .flex-grow-1= messages.error
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-success.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-check-circle.me-3.text-success.fa-lg
+                    .flex-grow-1= messages.success
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        // Card chính chứa dữ liệu
+        .card.border-0.shadow-sm.mb-4
+            // Header với thanh tìm kiếm
+            .card-header.bg-white.py-3
+                .row.align-items-center
+                    .col-md-8
+                        form#form-search.d-flex
+                            .input-group
+                                span.input-group-text.bg-light.border-end-0
+                                    i.fas.fa-search.text-muted
+                                input.form-control.border-start-0.ps-0(
+                                    type="text"
+                                    placeholder="Tìm kiếm tài khoản người dùng..."
+                                    name="keyword"
+                                    value=keyword || ""
+                                )
+                                button.btn.btn-primary(type="submit") Tìm kiếm
+            
+            // Bảng người dùng
+            .card-body.p-0
+                .table-responsive
+                    table.table.table-hover.align-middle.mb-0
+                        thead.bg-light
+                            tr
+                                th.text-center(width="5%") STT
+                                th.text-center(width="15%") Avatar
+                                th(width="25%") Họ tên
+                                th(width="25%") Email
+                                th.text-center(width="15%") Trạng thái
+                                th.text-center(width="15%") Thao tác
+                        
+                        tbody
+                            if records.length === 0
+                                tr
+                                    td.text-center.py-5(colspan="6")
+                                        .text-muted
+                                            i.fas.fa-users-slash.fa-3x.mb-3.d-block
+                                            p.mb-0 Không tìm thấy người dùng nào
+                            else
+                                each record, index in records
+                                    tr(class=record.status === "inactive" ? "table-secondary" : "")
+                                        td.text-center #{(pagination.currentPage - 1) * pagination.limitItems + index + 1}
+                                        
+                                        td.text-center
+                                            .user-avatar.rounded-circle.border.shadow-sm.mx-auto(style="width: 50px; height: 50px; overflow: hidden;")
+                                                if record.avatar
+                                                    img.img-fluid(
+                                                        src=record.avatar
+                                                        alt=record.fullName
+                                                        style="width: 100%; height: 100%; object-fit: cover;"
+                                                    )
+                                                else
+                                                    .bg-primary.d-flex.align-items-center.justify-content-center.h-100
+                                                        i.fas.fa-user.text-white
+                                        
+                                        td
+                                            a.user-name.text-decoration-none(href=`/admin/user/detail/${record.id}`)
+                                                h6.fw-bold.mb-1 #{record.fullName}
+                                            small.text-muted.d-block
+                                                i.fas.fa-calendar-alt.me-1
+                                                | Đăng ký: #{record.createdAt ? new Date(record.createdAt).toLocaleDateString('vi-VN') : "N/A"}
+                                        
+                                        td #{record.email}
+                                        
+                                        td.text-center
+                                            if(record.status == "active")
+                                                button.badge.rounded-pill.bg-success-subtle.text-success.border-0.px-3.py-2.status-badge(
+                                                    button-change-status 
+                                                    data-status="active"
+                                                    data-id=record.id
+                                                )
+                                                    i.fas.fa-check-circle.me-1
+                                                    | Hoạt động
+                                            else 
+                                                button.badge.rounded-pill.bg-danger-subtle.text-danger.border-0.px-3.py-2.status-badge(
+                                                    button-change-status
+                                                    data-status="inactive"
+                                                    data-id=record.id
+                                                )
+                                                    i.fas.fa-ban.me-1
+                                                    | Không hoạt động
+                                        
+                                        td.text-center
+                                            .action-buttons.d-flex.justify-content-center.gap-1
+                                                a.btn.btn-sm.btn-outline-info.action-btn(
+                                                    href=`/admin/user/detail/${record.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Chi tiết"
+                                                )
+                                                    i.fas.fa-eye
+                                                
+                                                a.btn.btn-sm.btn-outline-warning.action-btn(
+                                                    href=`/admin/user/edit/${record.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Sửa"
+                                                )
+                                                    i.fas.fa-edit
+                                                
+                                                a.btn.btn-sm.btn-outline-danger.action-btn(
+                                                    href=`/admin/user/delete/${record.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Xóa"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này không?');"
+                                                )
+                                                    i.fas.fa-trash-alt
+            
+            // Footer phân trang
+            .card-footer.bg-white.py-3
+                .row.align-items-center
+                    .col-md-6.text-muted
+                        .d-flex.align-items-center
+                            i.fas.fa-info-circle.me-2
+                            | Hiển thị #{pagination.limitItems} / #{pagination.totalItems} tài khoản
+                    .col-md-6
+                        +pagination(pagination)
+
+    //- // Form ẩn cho thay đổi trạng thái
+    //- form#form-change-status(action="" method="POST" data-path="/admin/user/change-status")
+    //-     input(type="hidden" name="_method" value="PATCH")
+
+    style.
+        /* Thiết kế nâng cao */
+        .page-title-wrapper {
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+        }
+        
+        .breadcrumb {
+            font-size: 0.85rem;
+        }
+        
+        /* Hiệu ứng cho avatar người dùng */
+        .user-avatar {
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            transition: transform 0.3s;
+        }
+        
+        .user-avatar:hover img {
+            transform: scale(1.1);
+        }
+        
+        /* Hiệu ứng cho tên người dùng */
+        .user-name {
+            color: #2a5298;
+            transition: all 0.2s;
+        }
+        
+        .user-name:hover {
+            color: #0d6efd;
+            text-decoration: underline !important;
+        }
+        
+        /* Nút trạng thái */
+        .status-badge {
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .status-badge:hover {
+            opacity: 0.8;
+        }
+        
+        /* Nút thao tác */
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Hiệu ứng cho cảnh báo */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        
+        .alert {
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        /* Màu sắc và hiệu ứng cho hàng trong bảng */
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        .table th {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Badge màu sắc mềm hơn */
+        .bg-success-subtle {
+            background-color: rgba(25, 135, 84, 0.15) !important;
+        }
+        
+        .text-success {
+            color: #198754 !important;
+        }
+        
+        .bg-danger-subtle {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Tự động tắt thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                let timer;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+            
+            // Xử lý thay đổi trạng thái người dùng
+            const buttonsChangeStatus = document.querySelectorAll("[button-change-status]");
+            const formChangeStatus = document.getElementById("form-change-status");
+            
+            if (buttonsChangeStatus.length > 0 && formChangeStatus) {
+                const path = formChangeStatus.getAttribute("data-path");
+                
+                buttonsChangeStatus.forEach(button => {
+                    button.addEventListener("click", function() {
+                        const statusCurrent = this.dataset.status;
+                        const id = this.dataset.id;
+                        
+                        // Xác định trạng thái mới
+                        const statusChange = statusCurrent === "active" ? "inactive" : "active";
+                        
+                        // Xác nhận trước khi thay đổi
+                        const statusText = statusCurrent === "active" ? "vô hiệu hóa" : "kích hoạt";
+                        if (confirm(`Bạn có chắc chắn muốn ${statusText} tài khoản này không?`)) {
+                            // Cập nhật action của form và submit
+                            const action = `${path}/${statusChange}/${id}`;
+                            formChangeStatus.action = action;
+                            formChangeStatus.submit();
+                        }
+                    });
+                });
+            }
+        });

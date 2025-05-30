@@ -1,0 +1,156 @@
+extends ../../layouts/default.pug
+block main
+    .container.py-4
+        .text-center.mb-4
+            h2.text-primary.mb-2
+                i.fas.fa-credit-card.me-2
+                | Thanh toán đơn hàng
+            .alert.alert-warning.d-inline-block
+                i.fas.fa-info-circle.me-2
+                | Trong trường hợp ngân hàng không chuyển được, bạn hãy chuyển bằng Ví điện tử
+        
+        .row.g-4
+            .col-md-7
+                .card.shadow-sm.mb-4
+                    .card-header.bg-white.py-3
+                        h5.card-title.mb-0
+                            i.fas.fa-shopping-cart.me-2
+                            | Chi tiết đơn hàng
+
+                    .card-body
+                        each item, index in cart.product
+                            .d-flex.align-items-center.mb-3.p-2.bg-light.rounded
+                                img.rounded.shadow-sm.me-3(
+                                    src=item.productInfo.thumbnail
+                                    alt=item.productInfo.title
+                                    style="width: 60px; height: 60px; object-fit: cover;"
+                                )
+                                .flex-grow-1
+                                    h6.mb-0 #{item.productInfo.title}
+                                    .text-muted.small Số lượng: #{item.quantity}
+                                .ms-3.text-end
+                                    .text-danger.fw-bold $#{item.totalPrice}
+
+                        hr.my-4
+
+                        .d-flex.justify-content-between.mb-2
+                            span Tạm tính:
+                            span.fw-bold $#{cart.totalPrice}
+                        .d-flex.justify-content-between.mb-2
+                            span Phí giao hàng:
+                            span.text-success Miễn phí
+                        hr
+                        .d-flex.justify-content-between
+                            span.h5 Tổng cộng:
+                            span.h5.text-danger $#{cart.totalPrice}
+
+            .col-md-5
+                form(action="/checkout/order", method="POST")
+                    //- Thêm trường ẩn totalPrice như yêu cầu
+                    input(type="hidden" name="totalPrice" value=cart.totalPrice)
+                    
+                    .card.shadow-sm.mb-4
+                        .card-header.bg-white.py-3
+                            h5.card-title.mb-0
+                                i.fas.fa-user-circle.me-2
+                                | Thông tin người nhận
+                        .card-body
+                            .form-group.mb-3
+                                label.form-label.fw-medium(for="fullName")
+                                    i.fas.fa-user.me-1.text-primary
+                                    | Họ và tên
+                                    span.text-danger *
+                                input.form-control(
+                                    type="text"
+                                    id="fullName"
+                                    name="fullName"
+                                    required
+                                    placeholder="Nhập họ tên người nhận"
+                                )
+                            
+                            .form-group.mb-3
+                                label.form-label.fw-medium(for="phone")
+                                    i.fas.fa-phone.me-1.text-primary
+                                    | Số điện thoại
+                                    span.text-danger *
+                                input.form-control(
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    required
+                                    placeholder="Nhập số điện thoại liên hệ"
+                                    pattern="[0-9]{10}"
+                                )
+                                .form-text.small.text-muted Vui lòng nhập đúng số điện thoại để liên hệ giao hàng
+                            
+                            .form-group.mb-3
+                                label.form-label.fw-medium(for="address")
+                                    i.fas.fa-map-marker-alt.me-1.text-primary
+                                    | Địa chỉ giao hàng
+                                    span.text-danger *
+                                textarea.form-control(
+                                    id="address"
+                                    name="address"
+                                    rows="3"
+                                    required
+                                    placeholder="Nhập địa chỉ giao hàng chi tiết"
+                                )
+
+                    .d-grid.gap-2
+                        button.btn.btn-primary.btn-lg.mb-3(type="submit")
+                            i.fas.fa-check-circle.me-2
+                            | Hoàn tất đặt hàng
+                        
+                        a.btn.btn-outline-secondary(href="/cart")
+                            i.fas.fa-arrow-left.me-2
+                            | Quay lại giỏ hàng
+
+        //- Di chuyển phần thông tin chuyển khoản xuống dưới nằm ngang
+        .row.mt-4
+            .col-12
+                .card.shadow-sm
+                    .card-header.bg-white.py-3
+                        h5.card-title.mb-0
+                            i.fas.fa-university.me-2
+                            | Thông tin chuyển khoản
+                    .card-body
+                        .row
+                            .col-md-7
+                                .bank-info.bg-light.rounded.p-4
+                                    .row
+                                        .col-md-6.mb-4
+                                            .d-flex.align-items-center
+                                                i.fas.fa-user.fa-2x.text-primary.me-3
+                                                .flex-grow-1
+                                                    .text-muted.small Chủ tài khoản
+                                                    .fw-bold.fs-5 LUONG MINH QUY
+                                        
+                                        .col-md-6.mb-4
+                                            .d-flex.align-items-center
+                                                i.fas.fa-building-columns.fa-2x.text-primary.me-3
+                                                .flex-grow-1
+                                                    .text-muted.small Ngân hàng
+                                                    .fw-bold.fs-5 MB Bank
+                                    
+                                    .d-flex.align-items-center
+                                        i.fas.fa-credit-card.fa-2x.text-primary.me-3
+                                        .flex-grow-1
+                                            .text-muted.small Số tài khoản
+                                            .fw-bold.fs-5 0528831816
+
+                                    .alert.alert-info.mt-4.mb-0
+                                        i.fas.fa-info-circle.me-2
+                                        strong Nội dung chuyển khoản:
+                                        br
+                                        | email - SĐT - Tên - Địa chỉ
+                            
+                            .col-md-5.d-flex.align-items-center.justify-content-center
+                                .qr-section.text-center.p-4
+                                    h6.text-muted.mb-3
+                                        i.fas.fa-qrcode.me-2
+                                        | Quét mã QR để thanh toán nhanh
+                                    img.img-fluid.rounded.shadow(
+                                        src="/images/Qr.png"
+                                        alt="QR Code"
+                                        style="max-width: 200px;"
+                                    )

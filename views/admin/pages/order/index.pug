@@ -1,0 +1,424 @@
+extends ../../layouts/default.pug
+include ../../mixin/pagination.pug
+include ../../mixin/search.pug
+
+block main
+    .container-fluid.py-4
+        // Header khu vực tiêu đề và breadcrumbs
+        .d-flex.flex-wrap.justify-content-between.align-items-center.mb-4
+            .page-title-wrapper
+                h4.text-primary.mb-1
+                    i.fas.fa-shopping-cart.me-2
+                    | Quản lý Đơn hàng
+                nav(aria-label="breadcrumb")
+                    ol.breadcrumb.mb-0
+                        li.breadcrumb-item
+                            a(href="/admin/dashboard")
+                                i.fas.fa-home.text-primary.me-1
+                                | Trang chủ
+                        li.breadcrumb-item.active(aria-current="page") Đơn hàng
+        
+        // Khu vực thông báo
+        if messages.error
+            .alert.alert-danger.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-danger.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-exclamation-circle.me-3.text-danger.fa-lg
+                    .flex-grow-1= messages.error
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        
+        if messages.success
+            .alert.alert-success.alert-dismissible.fade.show.position-relative.shadow-sm.border-start.border-success.border-4.rounded-3.mb-4
+                .d-flex.align-items-center
+                    i.fas.fa-check-circle.me-3.text-success.fa-lg
+                    .flex-grow-1= messages.success
+                button.btn-close(type="button" data-bs-dismiss="alert")
+                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+        
+        // Bảng đơn hàng
+        .card.border-0.shadow-sm.mb-4
+            // Header với thanh tìm kiếm
+            .card-header.bg-white.py-3
+                .row.g-3.align-items-center
+                    .col-md-8
+                        form.d-flex
+                            .input-group
+                                span.input-group-text.bg-light.border-end-0
+                                    i.fas.fa-search.text-muted
+                                input.form-control.border-start-0.ps-0(
+                                    type="text"
+                                    placeholder="Tìm kiếm theo tên khách hàng..."
+                                    name="keyword"
+                                    value=keyword || ""
+                                )
+                                button.btn.btn-primary(type="submit") Tìm kiếm
+                    
+                    .col-md-4
+                        .filters-wrapper.d-flex.justify-content-md-end
+                            select.form-select.status-filter(style="max-width: 180px")
+                                option(value="") Tất cả trạng thái
+                                option(value="pending") Chờ xử lý
+                                option(value="ongoing") Đang xử lý
+                                option(value="finished") Đã hoàn thành
+            
+            // Bảng đơn hàng
+            .card-body.p-0
+                .table-responsive
+                    table.table.table-hover.align-middle.mb-0
+                        thead.bg-light
+                            tr
+                                th.text-center(width="5%") #
+                                th(width="20%") Khách hàng
+                                th.text-center(width="15%") Mã đơn hàng
+                                th.text-center(width="10%") Tổng tiền
+                                th.text-center(width="10%") Ngày đặt
+                                th.text-center(width="15%") Trạng thái
+                                th.text-center(width="25%") Thao tác
+                        
+                        tbody
+                            if order && order.length > 0
+                                each item, index in order
+                                    tr
+                                        td.text-center #{(pagination.currentPage - 1) * pagination.limitItems + index + 1}
+                                        
+                                        td
+                                            .d-flex.flex-column
+                                                .fw-bold.mb-1 #{item.userInfo.fullName}
+                                                if item.userInfo.phone
+                                                    small.text-muted
+                                                        i.fas.fa-phone.me-1
+                                                        | #{item.userInfo.phone}
+                                        
+                                        td.text-center
+                                            a.order-id.text-decoration-none(href=`/admin/order/detail/${item.id}`)
+                                                span.badge.bg-light.text-dark.px-3.py-2.rounded-pill #{item._id.toString().slice(-8).toUpperCase()}
+                                        
+                                        td.text-center
+                                            span.text-danger.fw-bold
+                                                | $#{Number(item.totalPrice).toLocaleString()}
+                                        
+                                        td.text-center
+                                            span.small.text-muted #{new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                                        
+                                        td.text-center
+                                            if(item.status == "pending")
+                                                button.order-status.badge.rounded-pill.bg-warning-subtle.text-warning.border-0.px-3.py-2.change-status-btn(
+                                                    data-id=item.id
+                                                    data-current-status="pending"
+                                                )
+                                                    i.fas.fa-clock.me-1
+                                                    | Chờ xử lý
+                                            else if(item.status == "ongoing")
+                                                button.order-status.badge.rounded-pill.bg-primary-subtle.text-primary.border-0.px-3.py-2.change-status-btn(
+                                                    data-id=item.id
+                                                    data-current-status="ongoing"
+                                                )
+                                                    i.fas.fa-shipping-fast.me-1
+                                                    | Đang xử lý
+                                            else if(item.status == "finished")
+                                                button.order-status.badge.rounded-pill.bg-success-subtle.text-success.border-0.px-3.py-2.change-status-btn(
+                                                    data-id=item.id
+                                                    data-current-status="finished"
+                                                )
+                                                    i.fas.fa-check-circle.me-1
+                                                    | Đã hoàn thành
+                                            else 
+                                                button.order-status.badge.rounded-pill.bg-secondary.border-0.px-3.py-2.change-status-btn(
+                                                    data-id=item.id
+                                                    data-current-status=item.status || "unknown"
+                                                )
+                                                    | #{item.status || "Không xác định"}
+                                        
+                                        td.text-center
+                                            .btn-group
+                                                a.btn.btn-sm.btn-outline-info.action-btn(
+                                                    href=`/admin/order/detail/${item.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Xem chi tiết"
+                                                )
+                                                    i.fas.fa-eye
+                                                
+                                                a.btn.btn-sm.btn-outline-warning.mx-1.action-btn(
+                                                    href=`/admin/order/edit/${item.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Chỉnh sửa"
+                                                )
+                                                    i.fas.fa-edit
+                                                
+                                                a.btn.btn-sm.btn-outline-danger.action-btn(
+                                                    href=`/admin/order/delete/${item.id}`
+                                                    data-bs-toggle="tooltip"
+                                                    title="Xóa"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này không?');"
+                                                )
+                                                    i.fas.fa-trash-alt
+                            else
+                                tr
+                                    td.text-center.py-5(colspan="7")
+                                        .text-center
+                                            i.fas.fa-shopping-cart.fa-3x.text-muted.mb-3
+                                            h5.text-muted Không có đơn hàng nào
+                                            p.text-muted.small Các đơn hàng mới sẽ xuất hiện ở đây
+            
+            // Footer phân trang
+            .card-footer.bg-white.py-3
+                .row.align-items-center
+                    .col-md-6.text-muted
+                        .d-flex.align-items-center
+                            i.fas.fa-info-circle.me-2
+                            | Hiển thị #{pagination.limitItems} / #{pagination.totalItems} đơn hàng
+                    .col-md-6
+                        +pagination(pagination)
+    
+    // Modal thay đổi trạng thái
+    #statusModal.modal.fade(tabindex="-1")
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                .modal-header.bg-primary.text-white
+                    h5.modal-title
+                        i.fas.fa-exchange-alt.me-2
+                        | Thay đổi trạng thái đơn hàng
+                    button.btn-close.btn-close-white(data-bs-dismiss="modal")
+                .modal-body.p-4
+                    .form-group
+                        label.form-label.mb-3 Chọn trạng thái mới:
+                        select.form-select.mb-3#newStatus
+                            option(value="ongoing") Đang xử lý
+                            option(value="finished") Đã hoàn thành
+                        
+                        .form-text.text-muted.small
+                            i.fas.fa-info-circle.me-1
+                            | Thay đổi trạng thái sẽ được cập nhật ngay lập tức
+                .modal-footer
+                    button.btn.btn-secondary(data-bs-dismiss="modal") Hủy
+                    button.btn.btn-primary#saveStatus Lưu thay đổi
+
+    // Form ẩn cho thay đổi trạng thái
+    form#form-change-status(action="" method="POST" data-path="/admin/order/change-status")
+        input(type="hidden" name="_method" value="PATCH")
+
+    style.
+        /* Thiết kế nâng cao */
+        .page-title-wrapper {
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+        }
+        
+        .breadcrumb {
+            font-size: 0.85rem;
+        }
+        
+        /* Hiệu ứng cho ID đơn hàng */
+        .order-id {
+            transition: all 0.2s;
+        }
+        
+        .order-id:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Nút trạng thái */
+        .order-status {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .order-status:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Màu sắc cho trạng thái */
+        .bg-warning-subtle {
+            background-color: rgba(255, 193, 7, 0.15) !important;
+        }
+        
+        .text-warning {
+            color: #ffc107 !important;
+        }
+        
+        .bg-primary-subtle {
+            background-color: rgba(13, 110, 253, 0.15) !important;
+        }
+        
+        .bg-success-subtle {
+            background-color: rgba(25, 135, 84, 0.15) !important;
+        }
+        
+        /* Nút thao tác */
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Hiệu ứng cho cảnh báo */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        
+        .alert {
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        /* Màu sắc và hiệu ứng cho hàng trong bảng */
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        .table th {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Xử lý thay đổi trạng thái đơn hàng
+            const statusButtons = document.querySelectorAll(".change-status-btn");
+            const formChangeStatus = document.getElementById("form-change-status");
+            const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+            const saveStatusBtn = document.getElementById('saveStatus');
+            const newStatusSelect = document.getElementById('newStatus');
+            
+            if (statusButtons.length > 0 && formChangeStatus) {
+                statusButtons.forEach(button => {
+                    button.addEventListener("click", function() {
+                        const id = this.dataset.id;
+                        const currentStatus = this.dataset.currentStatus;
+                        
+                        // Set giá trị mặc định cho select
+                        newStatusSelect.value = currentStatus;
+                        
+                        // Lưu ID đơn hàng vào nút lưu
+                        saveStatusBtn.dataset.id = id;
+                        
+                        // Hiển thị modal
+                        statusModal.show();
+                    });
+                });
+                
+                // Xử lý khi lưu trạng thái mới
+                saveStatusBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const newStatus = newStatusSelect.value;
+                    
+                    if (id && newStatus) {
+                        // Cập nhật action của form và submit
+                        const path = formChangeStatus.getAttribute("data-path");
+                        formChangeStatus.action = `${path}/${newStatus}/${id}`;
+                        formChangeStatus.submit();
+                        
+                        // Đóng modal
+                        statusModal.hide();
+                    }
+                });
+            }
+            
+            // Bộ lọc trạng thái
+            const statusFilter = document.querySelector('.status-filter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    const status = this.value;
+                    
+                    // Lấy URL hiện tại
+                    const url = new URL(window.location.href);
+                    
+                    // Xóa tham số status cũ nếu có
+                    url.searchParams.delete('status');
+                    
+                    // Thêm status mới nếu đã chọn
+                    if (status) {
+                        url.searchParams.set('status', status);
+                    }
+                    
+                    // Chuyển tới URL mới
+                    window.location.href = url.toString();
+                });
+                
+                // Đặt giá trị từ URL hiện tại
+                const urlParams = new URLSearchParams(window.location.search);
+                const statusParam = urlParams.get('status');
+                if (statusParam) {
+                    statusFilter.value = statusParam;
+                }
+            }
+            
+            // Tự động tắt thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                let timer;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });

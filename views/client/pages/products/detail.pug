@@ -1,0 +1,284 @@
+extends ../../layouts/default.pug
+include ../../mixin/layoutProduct.pug
+
+block main
+    // Breadcrumb Navigation
+    .bg-light.py-3.mb-4
+        .container
+            nav(aria-label="breadcrumb")
+                ol.breadcrumb.mb-0
+                    li.breadcrumb-item
+                        a.text-decoration-none(href="/") Trang chủ
+                    li.breadcrumb-item
+                        a.text-decoration-none(href="/products") Sản phẩm
+                    li.breadcrumb-item.active(aria-current="page") #{product.title}
+    
+    .container
+        // Thông báo alert
+        if messages.error || messages.success
+            .row.mb-4
+                .col-12
+                    if messages.error
+                        .alert.alert-danger.alert-dismissible.fade.show.position-relative.shadow-sm.border-0.rounded-3
+                            i.fas.fa-exclamation-circle.me-2
+                            | #{messages.error}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+                    if messages.success
+                        .alert.alert-success.alert-dismissible.fade.show.position-relative.shadow-sm.border-0.rounded-3
+                            i.fas.fa-check-circle.me-2
+                            | #{messages.success}
+                            button.btn-close(type="button" data-bs-dismiss="alert")
+                            .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        // Chi tiết sản phẩm
+        .card.border-0.shadow-sm.rounded-4.overflow-hidden.mb-5
+            .card-body.p-0
+                .row.g-0
+                    // Phần hình ảnh sản phẩm
+                    .col-lg-6
+                        .product-gallery.position-relative.h-100
+                            // Badge giảm giá
+                            if product.discountPercentage > 0
+                                .position-absolute.top-0.start-0.m-3.z-1
+                                    .badge.bg-danger.p-2.rounded-pill.fs-6.fw-bold.shadow
+                                        i.fas.fa-bolt.me-1
+                                        | -#{product.discountPercentage}%
+                            
+                            // Badge sản phẩm nổi bật
+                            if product.featured == "1"
+                                .position-absolute.top-0.end-0.m-3.z-1
+                                    .badge.bg-primary.p-2.rounded-pill.fs-6.fw-bold.shadow
+                                        i.fas.fa-star.me-1
+                                        | Nổi bật
+                            
+                            // Hình ảnh chính
+                            .main-image.zoom-container.overflow-hidden
+                                img.img-fluid.product-image.w-100#main-product-image(
+                                    src=product.thumbnail
+                                    alt=product.title
+                                    data-zoom-image=product.thumbnail
+                                )
+                            
+                            // Thumbnail gallery (nếu có nhiều hình)
+                            if product.images && product.images.length > 0
+                                .product-thumbnails.mt-3.px-4
+                                    .row.g-2
+                                        .col-3.thumbnail-item.active
+                                            img.img-thumbnail.border-primary.shadow-sm.product-thumbnail(
+                                                src=product.thumbnail
+                                                alt="Thumbnail 1"
+                                                onclick="changeMainImage(this.src)"
+                                            )
+                                        each image, index in product.images
+                                            .col-3.thumbnail-item
+                                                img.img-thumbnail.product-thumbnail.shadow-sm(
+                                                    src=image
+                                                    alt=`Thumbnail ${index+2}`
+                                                    onclick="changeMainImage(this.src)"
+                                                )
+
+                    // Phần thông tin sản phẩm
+                    .col-lg-6
+                        .product-info.p-4.p-lg-5
+                            // Tiêu đề và phần review
+                            h1.product-title.display-6.fw-bold.mb-2 #{product.title}
+                            
+                            .product-rating.d-flex.align-items-center.mb-3
+                                .stars.me-2
+                                    i.fas.fa-star.text-warning
+                                    i.fas.fa-star.text-warning
+                                    i.fas.fa-star.text-warning
+                                    i.fas.fa-star.text-warning
+                                    i.fas.fa-star-half-alt.text-warning
+                                span.text-muted 4.5 (120 đánh giá)
+                            
+                            hr.my-4
+                            
+                            // Phần giá
+                            .product-price.mb-4
+                                .d-flex.align-items-end.gap-2.mb-2
+                                    .current-price.h1.mb-0.text-danger.fw-bold #{new Intl.NumberFormat('vi-VN').format(product.priceNew)}₫
+                                    if product.price > product.priceNew
+                                        .original-price.text-muted.text-decoration-line-through.fs-5 #{new Intl.NumberFormat('vi-VN').format(product.price)}₫
+                                        .discount-badge.badge.bg-danger.rounded-pill.ms-auto
+                                            | Tiết kiệm #{new Intl.NumberFormat('vi-VN').format(product.price - product.priceNew)}₫
+                                
+                                // Trạng thái tồn kho
+                                .product-stock.mb-4
+                                    if product.stock > 10
+                                        .d-flex.align-items-center.text-success
+                                            i.fas.fa-check-circle.me-2
+                                            span.fw-medium Còn hàng (#{product.stock} sản phẩm)
+                                    else if product.stock > 0
+                                        .d-flex.align-items-center.text-warning
+                                            i.fas.fa-exclamation-circle.me-2
+                                            span.fw-medium Sắp hết hàng (Chỉ còn #{product.stock} sản phẩm)
+                                    else
+                                        .d-flex.align-items-center.text-danger
+                                            i.fas.fa-times-circle.me-2
+                                            span.fw-medium Hết hàng
+                            
+                            // Phần mô tả ngắn
+                            .product-short-description.mb-4
+                                h5.fw-bold.mb-3 Mô tả sản phẩm
+                                p.text-muted.lh-lg #{product.description || "Không có mô tả chi tiết cho sản phẩm này."}
+                            
+                            // Form mua hàng
+                            if product.stock > 0
+                                form.add-to-cart-form.mb-4(action=`/cart/add/${product._id}` method="POST")
+                                    label.form-label.fw-medium(for="quantity") Số lượng
+                                    .d-flex.gap-3.mb-4
+                                        .quantity-wrapper.d-inline-flex.align-items-center.border.rounded
+                                            button.btn.btn-quantity.px-3.py-2.border-0#decrease-quantity(type="button")
+                                                i.fas.fa-minus
+                                            input#quantity.form-control.text-center.border-0.m-0(
+                                                type="number"
+                                                name="quantity"
+                                                value="1"
+                                                min="1"
+                                                max=product.stock
+                                                style="width: 60px; box-shadow: none;"
+                                            )
+                                            button.btn.btn-quantity.px-3.py-2.border-0#increase-quantity(type="button")
+                                                i.fas.fa-plus
+                                        
+                                    .action-buttons.d-grid.gap-2.d-md-block
+                                        button.btn.btn-primary.btn-lg.px-4.me-md-2(type="submit")
+                                            i.fas.fa-shopping-cart.me-2
+                                            | Thêm vào giỏ hàng
+                                        
+                            else
+                                .out-of-stock-message.alert.alert-warning
+                                    i.fas.fa-exclamation-triangle.me-2
+                                    | Sản phẩm hiện đang hết hàng. Vui lòng quay lại sau hoặc để lại email để được thông báo khi có hàng.
+                                form.notify-form
+                                    .input-group.mb-3
+                                        input.form-control(type="email" placeholder="Email của bạn" required)
+                                        button.btn.btn-primary(type="submit") Thông báo khi có hàng
+                            
+                            // Thông tin khuyến mãi và dịch vụ
+                            .product-benefits.mt-4
+                                .row.g-3
+                                    .col-md-6
+                                        .benefit-item.d-flex.align-items-center.p-3.bg-light.rounded-3.h-100
+                                            i.fas.fa-truck.text-primary.fa-2x.me-3
+                                            div
+                                                h6.fw-bold.mb-1 Miễn phí vận chuyển
+                                                p.small.mb-0.text-muted Cho đơn hàng từ 500.000₫
+                                    
+                                    .col-md-6
+                                        .benefit-item.d-flex.align-items-center.p-3.bg-light.rounded-3.h-100
+                                            i.fas.fa-sync.text-primary.fa-2x.me-3
+                                            div
+                                                h6.fw-bold.mb-1 Đổi trả dễ dàng
+                                                p.small.mb-0.text-muted 30 ngày đổi trả miễn phí
+
+    script.
+        // Xử lý tự động tắt alert
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                let timer;
+                
+                timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    progressBar.style.width = percentage + '%';
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft);
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+            
+            // Xử lý các nút tăng giảm số lượng
+            const decreaseBtn = document.getElementById('decrease-quantity');
+            const increaseBtn = document.getElementById('increase-quantity');
+            const quantityInput = document.getElementById('quantity');
+            
+            if(decreaseBtn && increaseBtn && quantityInput) {
+                decreaseBtn.addEventListener('click', function() {
+                    const currentValue = parseInt(quantityInput.value);
+                    if(currentValue > 1) {
+                        quantityInput.value = currentValue - 1;
+                    }
+                });
+                
+                increaseBtn.addEventListener('click', function() {
+                    const currentValue = parseInt(quantityInput.value);
+                    const maxValue = parseInt(quantityInput.getAttribute('max'));
+                    if(currentValue < maxValue) {
+                        quantityInput.value = currentValue + 1;
+                    }
+                });
+            }
+        });
+    style.
+        /* Các style khác giữ nguyên */
+        
+        /* Cải thiện style cho phần số lượng */
+        .quantity-wrapper {
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .btn-quantity {
+            background-color: #f8f9fa;
+            color: #212529;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-quantity:hover {
+            background-color: #e9ecef;
+        }
+        
+        #quantity::-webkit-inner-spin-button, 
+        #quantity::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0; 
+        }
+        
+        #quantity {
+            -moz-appearance: textfield;
+            background-color: #fff;
+            height: 40px;
+        }
+        
+        .btn-quantity:focus, #quantity:focus {
+            box-shadow: none;
+            outline: none;
+        }
+        
+        

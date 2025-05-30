@@ -1,0 +1,206 @@
+extends ../../layouts/default.pug
+include ../../mixin/tree.pug
+block main
+    .card.shadow-sm.mb-4
+        .card-header.bg-white.py-3
+            .d-flex.justify-content-between.align-items-center
+                h5.card-title.mb-0
+                    i.fas.fa-folder-plus.me-2.text-primary
+                    | Tạo danh mục sản phẩm mới
+                a.btn.btn-outline-secondary.btn-sm(href="/admin/products-category")
+                    i.fas.fa-arrow-left.me-1
+                    | Quay lại danh sách
+        .card-body.p-4
+            if messages.error
+                .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                    i.fas.fa-exclamation-circle.me-2
+                    | #{messages.error}
+                    button.btn-close(type="button" data-bs-dismiss="alert")
+                    .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                        .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+            if messages.success
+                .alert.alert-success.alert-dismissible.fade.show.position-relative
+                    i.fas.fa-check-circle.me-2
+                    | #{messages.success}
+                    button.btn-close(type="button" data-bs-dismiss="alert")
+                    .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                        .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        .card-body
+            form(
+                action='/admin/products-category/create',
+                method='POST',
+                enctype='multipart/form-data',
+                class="needs-validation"
+            )
+                .row
+                    .col-md-8
+                        .card.shadow-sm.mb-4
+                            .card-header.bg-white
+                                h6.card-subtitle.mb-0
+                                    i.fas.fa-info-circle.me-2
+                                    | Thông tin cơ bản
+                            .card-body
+                                .row.g-3
+                                    .col-md-12.mb-3
+                                        label.form-label.fw-medium(for='title')
+                                            | Tiêu đề
+                                            span.text-danger *
+                                        input.form-control(
+                                            type='text',
+                                            id='title',
+                                            name='title',
+                                            required
+                                            placeholder="Nhập tiêu đề danh mục"
+                                        )
+                                        .invalid-feedback Vui lòng nhập tiêu đề danh mục
+                                    
+                                    .col-md-12.mb-3
+                                        label.form-label.fw-medium(for='parent_id') Danh mục cha
+                                        select.form-select(
+                                            name="parent_id" 
+                                            id="parent_id"
+                                        )
+                                            option(value="") Chọn danh mục cha
+                                            if(productCategories)
+                                                +tree(productCategories)
+                                
+                                    .col-md-12.mb-3
+                                        label.form-label.fw-medium(for='desc')
+                                            | Mô tả
+                                            span.text-danger *
+                                        textarea.form-control(
+                                            id='desc',
+                                            name='description',
+                                            required
+                                            rows="5"
+                                            placeholder="Nhập mô tả chi tiết về danh mục"
+                                        )
+                                        .invalid-feedback Vui lòng nhập mô tả danh mục
+                    
+                    .col-md-4
+                        .card.shadow-sm.mb-4
+                            .card-header.bg-white
+                                h6.card-subtitle.mb-0
+                                    i.fas.fa-cog.me-2
+                                    | Tùy chọn
+                            .card-body
+                                .mb-3
+                                    label.form-label.fw-medium(for='thumbnail') Ảnh đại diện
+                                    .text-center.mb-3
+                                        img#preview-image.img-fluid.rounded.shadow-sm(
+                                            src="/images/default-category.jpg"
+                                            alt="Preview"
+                                            style="max-height: 200px; object-fit: contain;"
+                                        )
+                                    input.form-control(
+                                        type="file"
+                                        id="thumbnail"
+                                        name="thumbnail"
+                                        accept="image/*"
+                                    )
+                                    .form-text.small.text-muted Kích thước tối đa: 5MB. Định dạng: JPG, PNG, GIF, WEBP
+                                .mb-3
+                                    label.form-label.fw-medium(for='position') Vị trí hiển thị
+                                    input.form-control(
+                                        type='number',
+                                        id='position',
+                                        name='position',
+                                        placeholder="Tự động tăng"
+                                        min='1'
+                                    )
+                                    .form-text.small.text-muted Để trống để tự động sắp xếp
+                                
+                                .mb-3
+                                    label.form-label.fw-medium Trạng thái
+                                    .d-flex
+                                        .form-check.me-3
+                                            input.form-check-input(
+                                                type="radio",
+                                                id="statusActive",
+                                                name="status",
+                                                value="active",
+                                                checked
+                                            )
+                                            label.form-check-label(for="statusActive") 
+                                                span.badge.bg-success Hoạt động
+                                        
+                                        .form-check
+                                            input.form-check-input(
+                                                type="radio",
+                                                id="statusInActive",
+                                                name="status",
+                                                value="inactive"
+                                            )
+                                            label.form-check-label(for="statusInActive")
+                                                span.badge.bg-secondary Không hoạt động
+                        
+                        .card.shadow-sm
+                            .card-body
+                                .d-grid.gap-2
+                                    button.btn.btn-primary(type='submit')
+                                        i.fas.fa-save.me-2
+                                        | Tạo danh mục
+                                    
+                                    button.btn.btn-outline-secondary(type='reset')
+                                        i.fas.fa-undo.me-2
+                                        | Làm mới
+    script.
+        document.getElementById('thumbnail').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                document.getElementById('preview-image').src = URL.createObjectURL(file);
+            }
+        };
+         // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });
+
+

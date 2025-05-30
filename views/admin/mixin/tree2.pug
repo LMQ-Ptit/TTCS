@@ -1,0 +1,55 @@
+mixin tree(productCategories, level = 1)
+    each product in productCategories
+        tr
+            td.text-center #{product.index}
+            td
+                img.rounded.shadow-sm(
+                    src=product.thumbnail
+                    alt=product.title
+                    style="width: 80px; height: 80px; object-fit: cover;"   
+                )
+            td
+                .fw-bold #{prefix}#{product.title}
+            
+            td.text-center #{product.position}
+            td.text-center
+                if(product.status == "active")
+                    button(
+                        class="badge bg-success border-0"
+                        button-change-status 
+                        data-status="active"
+                        data-id=product.id
+                    )
+                        i.fas.fa-check-circle.me-1
+                        | Hoạt động
+                else 
+                    button(
+                        class="badge bg-danger border-0"
+                        button-change-status
+                        data-status="inactive"
+                        data-id=product.id
+                    )
+                        i.fas.fa-ban.me-1
+                        | Không hoạt động
+            td.text-center
+                .btn-group
+                    a(
+                        href=`/admin/products-category/detail/${product.id}`
+                        class="btn btn-info btn-sm"
+                        title="Chi tiết"
+                    )
+                        i.fas.fa-eye Chi tiết
+                    a(
+                        href=`/admin/products-category/edit/${product.id}`
+                        class="btn btn-warning btn-sm"
+                        title="Sửa"
+                    )
+                        i.fas.fa-edit Sửa
+                    a(
+                        href=`/admin/products-category/delete/${product.id}`
+                        class="btn btn-danger btn-sm me-1"
+                        title="Chỉnh sửa"
+                        onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này không?');"
+                    )
+                        i.fas.fa-edit Xóa
+        

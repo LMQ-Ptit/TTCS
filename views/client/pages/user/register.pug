@@ -1,0 +1,167 @@
+extends ../../layouts/default.pug
+
+block main
+    .container.py-5
+        .row.justify-content-center
+            .col-md-8.col-lg-6
+                .card.shadow-lg.border-0
+                    .card-header.bg-primary.text-white.text-center.py-4
+                        h1.h3.mb-0
+                            i.fas.fa-user-plus.fa-2x.d-block.mb-2
+                            | Đăng ký tài khoản
+
+                    .card-body.p-4
+                        if messages.error
+                            .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                                i.fas.fa-exclamation-circle.me-2
+                                | #{messages.error}
+                                button.btn-close(type="button" data-bs-dismiss="alert")
+                                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                    .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+                        if messages.success
+                            .alert.alert-success.alert-dismissible.fade.show.position-relative
+                                i.fas.fa-check-circle.me-2
+                                | #{messages.success}
+                                button.btn-close(type="button" data-bs-dismiss="alert")
+                                .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                                    .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+                        form(
+                            action="/user/register"
+                            method="POST"
+                            class="needs-validation"
+                            novalidate
+                        )
+                            .form-group.mb-3
+                                label.form-label(for="fullName")
+                                    i.fas.fa-user.me-2
+                                    | Họ và tên
+                                .input-group
+                                    span.input-group-text
+                                        i.fas.fa-user
+                                    input.form-control(
+                                        type="text"
+                                        id="fullName"
+                                        name="fullName"
+                                        placeholder="Nhập họ và tên"
+                                        required
+                                    )
+                                .invalid-feedback Vui lòng nhập họ và tên
+
+                            .form-group.mb-3
+                                label.form-label(for="email")
+                                    i.fas.fa-envelope.me-2
+                                    | Email
+                                .input-group
+                                    span.input-group-text
+                                        i.fas.fa-envelope
+                                    input.form-control(
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        placeholder="Nhập email"
+                                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                        required
+                                    )
+                                .invalid-feedback Email không hợp lệ. Vui lòng nhập đúng định dạng (ví dụ: example@domain.com)
+
+                            .form-group.mb-4
+                                label.form-label(for="password")
+                                    i.fas.fa-lock.me-2
+                                    | Mật khẩu
+                                .input-group
+                                    span.input-group-text
+                                        i.fas.fa-lock
+                                    input.form-control(
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        placeholder="Nhập mật khẩu"
+                                        required
+                                    )
+                                    button.btn.btn-outline-secondary(
+                                        type="button"
+                                        id="togglePassword"
+                                        aria-label="Ẩn/hiện mật khẩu"
+                                    )
+                                        i.fas.fa-eye
+                                .invalid-feedback Vui lòng nhập mật khẩu
+
+                            .d-grid.gap-2.mb-3
+                                button.btn.btn-primary.py-2(type="submit")
+                                    i.fas.fa-user-plus.me-2
+                                    | Đăng ký
+
+                    .card-footer.bg-light.text-center.py-3
+                        | Đã có tài khoản? 
+                        a.text-decoration-none(href="/user/login")
+                            | Đăng nhập ngay
+                            i.fas.fa-arrow-right.ms-2
+
+    script.
+         // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });
+
+        // Xử lý chức năng hiển thị/ẩn mật khẩu
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });

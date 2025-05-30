@@ -1,0 +1,276 @@
+extends ../../layouts/default.pug 
+
+block main
+    .container.py-4
+        .card-body.p-4
+            if messages.error
+                .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                    i.fas.fa-exclamation-circle.me-2
+                    | #{messages.error}
+                    button.btn-close(type="button" data-bs-dismiss="alert")
+                    .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                        .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+            if messages.success
+                .alert.alert-success.alert-dismissible.fade.show.position-relative
+                    i.fas.fa-check-circle.me-2
+                    | #{messages.success}
+                    button.btn-close(type="button" data-bs-dismiss="alert")
+                    .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                        .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        .d-flex.justify-content-between.align-items-center.mb-4
+            h1.text-primary.mb-0
+                i.fas.fa-edit.me-2
+                | Chỉnh sửa sản phẩm
+            a.btn.btn-outline-primary(href="/admin/products")
+                i.fas.fa-arrow-left.me-2
+                | Quay lại
+
+        form(
+            action=`/admin/products/edit/${product.id}?_method=PATCH`
+            method="POST"
+            enctype="multipart/form-data"
+            id="form-edit-product"
+            class="needs-validation"
+            novalidate
+        )
+            .row
+                .col-md-8
+                    .card.shadow-sm.mb-4
+                        .card-header.bg-white
+                            h5.card-title.mb-0
+                                i.fas.fa-info-circle.me-2
+                                | Thông tin cơ bản
+
+                        .card-body
+                            .row.g-3
+                                .col-md-12
+                                    .form-group
+                                        label.form-label(for="title") Tiêu đề *
+                                        input.form-control(
+                                            type="text"
+                                            id="title"
+                                            name="title"
+                                            value=product.title
+                                            required
+                                        )
+                                        .invalid-feedback Vui lòng nhập tiêu đề
+
+                                .col-md-12
+                                    .form-group
+                                        label.form-label(for="desc") Mô tả
+                                        textarea.form-control(
+                                            id="desc"
+                                            name="description"
+                                            rows="5"
+                                        ) #{product.description}
+
+                                .col-md-6
+                                    .form-group
+                                        label.form-label(for="price") Giá *
+                                        .input-group
+                                            span.input-group-text $
+                                            input.form-control(
+                                                type="number"
+                                                id="price"
+                                                name="price"
+                                                value=product.price
+                                                min="0"
+                                                required
+                                            )
+
+                                .col-md-6
+                                    .form-group
+                                        label.form-label(for="discount") % Giảm giá
+                                        .input-group
+                                            input.form-control(
+                                                type="number"
+                                                id="discount"
+                                                name="discountPercentage"
+                                                value=product.discountPercentage
+                                                min="0"
+                                                max="100"
+                                            )
+                                            span.input-group-text %
+
+                                .col-md-6
+                                    .form-group
+                                        label.form-label(for="stock") Số lượng *
+                                        input.form-control(
+                                            type="number"
+                                            id="stock"
+                                            name="stock"
+                                            value=product.stock
+                                            min="0"
+                                            required
+                                        )
+
+                                .col-md-6
+                                    .form-group
+                                        label.form-label(for="position") Vị trí
+                                        input.form-control(
+                                            type="number"
+                                            id="position"
+                                            name="position"
+                                            value=product.position
+                                            placeholder="Tự động tăng"
+                                            min="1"
+                                        )
+
+                .col-md-4
+                    .card.shadow-sm.mb-4
+                        .card-header.bg-white
+                            h5.card-title.mb-0
+                                i.fas.fa-image.me-2
+                                | Hình ảnh
+
+                        .form-group
+                            label.form-label(for="thumbnail") Hình ảnh sản phẩm
+                            .text-center.mb-3
+                                img#preview-image.img-fluid.rounded.shadow-sm(
+                                    src=product.thumbnail || "/images/default-product.jpg"
+                                    alt=product.title
+                                    style="max-height: 200px; object-fit: contain;"
+                                )
+                            input.form-control(
+                                type="file"
+                                id="thumbnail"
+                                name="thumbnail"
+                                accept="image/*"
+                            )
+                            .form-text.small.text-muted Để trống nếu không muốn thay đổi ảnh
+
+
+                    .card.shadow-sm.mb-4
+                        .card-header.bg-white
+                            h5.card-title.mb-0
+                                i.fas.fa-cog.me-2
+                                | Tùy chọn
+
+                        .card-body
+                            .form-group.mb-3
+                                label.form-label Loại sản phẩm
+                                .d-flex.gap-3
+                                    .form-check
+                                        input#featured1.form-check-input(
+                                            type="radio"
+                                            name="featured"
+                                            value="1"
+                                            checked=(product.featured == 1)
+                                        )
+                                        label.form-check-label(for="featured1")
+                                            i.fas.fa-star.text-warning.me-1
+                                            | Nổi bật
+
+                                    .form-check
+                                        input#featured0.form-check-input(
+                                            type="radio"
+                                            name="featured"
+                                            value="0"
+                                            checked=(product.featured == 0)
+                                        )
+                                        label.form-check-label(for="featured0")
+                                            i.fas.fa-star.text-muted.me-1
+                                            | Bình thường
+
+                            .form-group
+                                label.form-label Trạng thái
+                                .d-flex.gap-3
+                                    .form-check
+                                        input#statusActive.form-check-input(
+                                            type="radio"
+                                            name="status"
+                                            value="active"
+                                            checked=(product.status == 'active')
+                                        )
+                                        label.form-check-label(for="statusActive")
+                                            i.fas.fa-check-circle.text-success.me-1
+                                            | Hoạt động
+
+                                    .form-check
+                                        input#statusInactive.form-check-input(
+                                            type="radio"
+                                            name="status"
+                                            value="inactive"
+                                            checked=(product.status == 'inactive')
+                                        )
+                                        label.form-check-label(for="statusInactive")
+                                            i.fas.fa-ban.text-danger.me-1
+                                            | Dừng hoạt động
+
+            .text-end.mt-4
+                button.btn.btn-secondary.me-2(type="reset")
+                    i.fas.fa-undo.me-2
+                    | Hoàn tác
+                button.btn.btn-primary(type="submit")
+                    i.fas.fa-save.me-2
+                    | Cập nhật
+
+    script.
+        function previewImage(input) {
+            const preview = document.getElementById('preview-image');
+            preview.src = input.value || '/images/default-product.jpg';
+        }
+    script.
+         // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });
+    // Thêm JavaScript xem trước ảnh
+    script.
+        document.getElementById('thumbnail').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                document.getElementById('preview-image').src = URL.createObjectURL(file);
+            }
+        };
+
+
+
+    script(src="/admin/js/product.js")

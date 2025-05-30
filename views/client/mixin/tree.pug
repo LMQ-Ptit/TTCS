@@ -1,0 +1,31 @@
+mixin categoryTree(categories, level = 0, selectedId = null)
+  each category in categories
+    - const hasChildren = category.children && category.children.length > 0
+    - const isActive = category._id.toString() === selectedId
+    - const showChildren = isActive || false // Hiển thị con nếu danh mục được chọn
+    
+    .category-item.mb-2
+      .d-flex.align-items-center
+        if hasChildren
+          button.btn.btn-sm.btn-link.p-0.me-1.category-toggle(
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target=`#category-${category._id}`
+            aria-expanded=showChildren ? "true" : "false"
+          )
+            i.fas.fa-chevron-right.category-icon(class=showChildren ? "fa-rotate-90" : "")
+        
+        a.category-link.d-block.py-2.ps-2.text-decoration-none.rounded.flex-grow-1(
+          href=`/products?product_category_id=${category._id}`,
+          class=isActive ? 'active' : ''
+        )
+          if hasChildren
+            i.fas.fa-folder.me-2.text-primary
+          else
+            i.fas.fa-file.me-2.text-primary
+          span.fw-medium #{category.title}
+      
+      if hasChildren
+        .collapse(id=`category-${category._id}`, class=showChildren ? "show" : "")
+          .subcategory-container.ps-4.mt-1.border-start.border-2
+            +categoryTree(category.children, level + 1, selectedId)

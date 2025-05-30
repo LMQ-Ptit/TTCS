@@ -1,0 +1,275 @@
+extends ../../layouts/default.pug
+
+block main
+    .container.py-4
+        .card-body.p-4
+            if messages.error
+                .alert.alert-danger.alert-dismissible.fade.show.position-relative
+                    i.fas.fa-exclamation-circle.me-2
+                    | #{messages.error}
+                    button.btn-close(type="button" data-bs-dismiss="alert")
+                    .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                        .progress-bar.bg-danger.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+            if messages.success
+                .alert.alert-success.alert-dismissible.fade.show.position-relative
+                    i.fas.fa-check-circle.me-2
+                    | #{messages.success}
+                    button.btn-close(type="button" data-bs-dismiss="alert")
+                    .progress.position-absolute.bottom-0.start-0.end-0.rounded-0(style="height: 4px;")
+                        .progress-bar.bg-success.progress-bar-striped.progress-countdown(role="progressbar", style="width: 100%")
+
+        .d-flex.justify-content-between.align-items-center.mb-4
+            h1.text-primary.mb-0
+                i.fas.fa-user-plus.me-2
+                | Thêm mới tài khoản
+            a.btn.btn-outline-primary(href="/admin/accounts")
+                i.fas.fa-arrow-left.me-2
+                | Quay lại
+
+        .card.shadow-sm
+            .card-body
+                form(
+                    action="/admin/accounts/create"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="needs-validation"
+                )
+                    .row
+                        .col-md-8
+                            .card.bg-light.border-0.mb-4
+                                .card-body
+                                    h5.card-title.mb-3
+                                        i.fas.fa-info-circle.me-2
+                                        | Thông tin cơ bản
+
+                                    .row.g-3
+                                        .col-md-6
+                                            .form-group
+                                                label.form-label(for="fullName") Họ tên *
+                                                input.form-control(
+                                                    type="text"
+                                                    id="fullName"
+                                                    name="fullName"
+                                                    required
+                                                )
+                                                .invalid-feedback Vui lòng nhập họ tên
+
+                                        .col-md-6
+                                            .form-group
+                                                label.form-label(for="email") Email *
+                                                input.form-control(
+                                                    type="email"
+                                                    id="email"
+                                                    name="email"
+                                                    required
+                                                )
+                                                .invalid-feedback Vui lòng nhập email hợp lệ
+
+                                        .col-md-6
+                                            .form-group
+                                                label.form-label(for="password") Mật khẩu *
+                                                .input-group
+                                                    input.form-control(
+                                                        type="password"
+                                                        id="password"
+                                                        name="password"
+                                                        required
+                                                    )
+                                                    button.btn.btn-outline-secondary(
+                                                        type="button"
+                                                        onclick="togglePassword()"
+                                                    )
+                                                        i.fas.fa-eye
+                                                .invalid-feedback Vui lòng nhập mật khẩu
+
+                                        .col-md-6
+                                            .form-group
+                                                label.form-label(for="phone") Số điện thoại
+                                                input.form-control(
+                                                    type="text"
+                                                    id="phone"
+                                                    name="phone"
+                                                )
+                            .card.bg-light.border-0.mb-4
+                                .card-body
+                                    h5.card-title.mb-3
+                                        i.fas.fa-user-tag.me-2
+                                        | Vai trò
+
+                                    .d-flex.gap-3
+                                        .form-check
+                                            input.form-check-input(
+                                                type="radio"
+                                                id="roleAdmin"
+                                                name="role"
+                                                value="admin"
+                                            )
+                                            label.form-check-label(for="roleAdmin")
+                                                i.fas.fa-user-shield.text-primary.me-1
+                                                | Quản trị viên
+                                            small.d-block.text-muted.ms-4 Toàn quyền trên hệ thống
+
+                                        .form-check
+                                            input.form-check-input(
+                                                type="radio"
+                                                id="roleContent"
+                                                name="role"
+                                                value="content-manager"
+                                                checked
+                                            )
+                                            label.form-check-label(for="roleContent")
+                                                i.fas.fa-pen-fancy.text-success.me-1
+                                                | Quản lý nội dung
+                                            small.d-block.text-muted.ms-4 Chỉ quản lý sản phẩm và đơn hàng
+
+                        .col-md-4
+                            .card.bg-light.border-0.mb-4
+                                .card-body
+                                    h5.card-title.mb-3
+                                        i.fas.fa-image.me-2
+                                        | Ảnh đại diện
+
+                                    .text-center.mb-3
+                                        .avatar-preview.rounded-circle.bg-secondary.d-flex.align-items-center.justify-content-center.mx-auto(
+                                            style="width: 150px; height: 150px;"
+                                        )
+                                            i#preview-icon.fas.fa-user.fa-4x.text-white
+                                            img#preview-avatar.rounded-circle(
+                                                src=""
+                                                alt="Avatar Preview"
+                                                style="display: none; width: 100%; height: 100%; object-fit: cover;"
+                                            )
+                                    
+                                    .form-group
+                                        label.form-label(for="avatar") Upload ảnh đại diện
+                                        input.form-control(
+                                            type="file"
+                                            id="avatar"
+                                            name="avatar"
+                                            accept="image/*"
+                                        )
+                                        .form-text.small.text-muted Kích thước tối đa: 2MB. Định dạng: JPG, PNG, GIF
+
+
+                            .card.bg-light.border-0
+                                .card-body
+                                    h5.card-title.mb-3
+                                        i.fas.fa-toggle-on.me-2
+                                        | Trạng thái
+
+                                    .d-flex.gap-3
+                                        .form-check
+                                            input.form-check-input(
+                                                type="radio"
+                                                id="statusActive"
+                                                name="status"
+                                                value="active"
+                                                checked
+                                            )
+                                            label.form-check-label(for="statusActive")
+                                                i.fas.fa-check-circle.text-success.me-1
+                                                | Hoạt động
+
+                                        .form-check
+                                            input.form-check-input(
+                                                type="radio"
+                                                id="statusInactive"
+                                                name="status"
+                                                value="inactive"
+                                            )
+                                            label.form-check-label(for="statusInactive")
+                                                i.fas.fa-ban.text-danger.me-1
+                                                | Dừng hoạt động
+
+                    .text-end.mt-4
+                        button.btn.btn-secondary.me-2(type="reset")
+                            i.fas.fa-undo.me-2
+                            | Nhập lại
+                        button.btn.btn-primary(type="submit")
+                            i.fas.fa-save.me-2
+                            | Tạo tài khoản
+
+    script.
+        document.getElementById('avatar').onchange = function(evt) {
+            const [file] = this.files;
+            if (file) {
+                const previewIcon = document.getElementById('preview-icon');
+                const previewAvatar = document.getElementById('preview-avatar');
+                
+                previewAvatar.src = URL.createObjectURL(file);
+                previewAvatar.style.display = 'block';
+                previewIcon.style.display = 'none';
+            }
+        };
+        function togglePassword() {
+            const password = document.getElementById("password");
+            const icon = document.querySelector(".fa-eye");
+            if (password.type === "password") {
+                password.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                password.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
+        function previewAvatar(input) {
+            const preview = document.querySelector('.avatar-preview');
+            if (input.value) {
+                preview.innerHTML = `<img src="${input.value}" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">`;
+            } else {
+                preview.innerHTML = '<i class="fas fa-user fa-4x text-white"></i>';
+            }
+        }
+    script.
+         // Tự động tắt thông báo sau 3 giây với thanh tiến độ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tìm tất cả các thông báo
+            const alerts = document.querySelectorAll('.alert');
+            const duration = 3000; // 3 giây
+            const interval = 50; // Cập nhật mỗi 50ms
+            
+            alerts.forEach(function(alert) {
+                const progressBar = alert.querySelector('.progress-countdown');
+                let timeLeft = duration;
+                
+                // Tạo interval để cập nhật thanh tiến độ
+                const timer = setInterval(function() {
+                    timeLeft -= interval;
+                    const percentage = (timeLeft / duration) * 100;
+                    
+                    // Cập nhật chiều rộng của thanh tiến độ
+                    progressBar.style.width = percentage + '%';
+                    
+                    // Khi hết thời gian, xóa interval và đóng thông báo
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, interval);
+                
+                // Nếu người dùng di chuột vào thông báo, tạm dừng đếm ngược
+                alert.addEventListener('mouseenter', function() {
+                    clearInterval(timer);
+                });
+                
+                // Khi di chuột ra khỏi thông báo, tiếp tục đếm ngược
+                alert.addEventListener('mouseleave', function() {
+                    timeLeft = Math.max(1000, timeLeft); // Cho ít nhất 1 giây để người dùng phản ứng
+                    
+                    timer = setInterval(function() {
+                        timeLeft -= interval;
+                        const percentage = (timeLeft / duration) * 100;
+                        progressBar.style.width = percentage + '%';
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, interval);
+                });
+            });
+        });
+

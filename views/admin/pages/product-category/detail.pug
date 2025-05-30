@@ -1,0 +1,152 @@
+extends ../../layouts/default.pug
+include ../../mixin/tree2.pug
+block main
+    // Header và breadcrumb
+    .d-flex.justify-content-between.align-items-center.mb-4
+        h1.text-primary.mb-0
+            i.fas.fa-folder.me-2
+            | Chi tiết danh mục
+        
+        .d-flex.gap-2
+            a.btn.btn-primary(href=`/admin/products-category/edit/${productCategory._id}`)
+                i.fas.fa-edit.me-2
+                | Chỉnh sửa
+            
+            button.btn.btn-danger(data-bs-toggle="modal" data-bs-target="#deleteModal")
+                i.fas.fa-trash-alt.me-2
+                | Xóa
+    
+    // Breadcrumb
+    nav(aria-label="breadcrumb")
+        ol.breadcrumb.bg-light.p-3.rounded.mb-4
+            li.breadcrumb-item
+                a(href="/admin/dashboard") Trang chủ
+            li.breadcrumb-item
+                a(href="/admin/products-category") Danh mục sản phẩm
+            li.breadcrumb-item.active(aria-current="page") #{productCategory.title}
+    
+    // Nội dung chính
+    .row
+        // Cột trái: Thông tin chính
+        .col-lg-8
+            // Thông tin cơ bản
+            .card.shadow-sm.mb-4
+                .card-header.bg-white.d-flex.justify-content-between.align-items-center
+                    h5.card-title.mb-0
+                        i.fas.fa-info-circle.text-primary.me-2
+                        | Thông tin cơ bản
+                    
+                    if productCategory.status === "active"
+                        span.badge.bg-success Đang hoạt động
+                    else
+                        span.badge.bg-danger Đã ẩn
+                
+                .card-body
+                    .row.mb-3
+                        .col-md-3.fw-bold Tên danh mục:
+                        .col-md-9 #{productCategory.title}
+                    
+                    if productCategory.description
+                        .row.mb-3
+                            .col-md-3.fw-bold Mô tả:
+                            .col-md-9 #{productCategory.description}
+                    
+                    
+                    
+                    if productCategory.thumbnail
+                        .row.mb-3
+                            .col-md-3.fw-bold Hình ảnh:
+                            .col-md-9
+                                img.img-thumbnail(
+                                    src=productCategory.thumbnail
+                                    alt=productCategory.title
+                                    style="max-width: 200px;"
+                                )
+                    
+                    .row.mb-0
+                        .col-md-3.fw-bold Vị trí:
+                        .col-md-9 #{productCategory.position || "N/A"}
+            
+            // Thời gian
+            .card.shadow-sm.mb-4
+                .card-header.bg-white
+                    h5.card-title.mb-0
+                        i.fas.fa-clock.text-primary.me-2
+                        | Thông tin thời gian
+                
+                .card-body
+                    .row.mb-3
+                        .col-md-3.fw-bold Ngày tạo:
+                        .col-md-9 #{new Date(productCategory.createdAt).toLocaleString('vi-VN')}
+                    
+                    if productCategory.updatedAt
+                        .row.mb-0
+                            .col-md-3.fw-bold Cập nhật lần cuối:
+                            .col-md-9 #{new Date(productCategory.updatedAt).toLocaleString('vi-VN')}
+        
+        // Cột phải: Thông tin bổ sung
+        .col-lg-4
+            // Danh mục cha
+            .card.shadow-sm.mb-4
+                .card-header.bg-white
+                    h5.card-title.mb-0
+                        i.fas.fa-sitemap.text-primary.me-2
+                        | Phân cấp danh mục
+                
+                .card-body
+                    if parentCategory
+                        .d-flex.align-items-center.mb-3
+                            .badge.bg-light.text-dark.border.p-2.me-2 Thuộc danh mục
+                            .fw-bold
+                                a.text-decoration-none(href=`/admin/products-category/detail/${parentCategory._id}`)
+                                    | #{parentCategory.title}
+                    else
+                        .alert.alert-info.mb-0
+                            | Đây là danh mục gốc
+                    
+                    hr
+                    
+                    p.mb-1 ID Danh mục:
+                    code.bg-light.p-2.rounded.d-block.mb-3 #{productCategory._id}
+                    
+                    if productCategory.parent_id
+                        p.mb-1 ID Danh mục cha:
+                        code.bg-light.p-2.rounded.d-block.mb-0 #{productCategory.parent_id}
+            
+            // Các thông tin khác
+            .card.shadow-sm.mb-4
+                .card-header.bg-white
+                    h5.card-title.mb-0
+                        i.fas.fa-cogs.text-primary.me-2
+                        | Cài đặt hiển thị
+                
+                .list-group.list-group-flush
+                    .list-group-item.d-flex.justify-content-between.align-items-center
+                        span Trạng thái
+                        if productCategory.status === "active"
+                            span.badge.bg-success.rounded-pill Hoạt động
+                        else
+                            span.badge.bg-danger.rounded-pill Đã ẩn
+                    
+                    
+    
+    // Modal xác nhận xóa
+    #deleteModal.modal.fade(tabindex="-1")
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                .modal-header.bg-danger.text-white
+                    h5.modal-title
+                        i.fas.fa-exclamation-triangle.me-2
+                        | Xác nhận xóa
+                    button.btn-close.btn-close-white(data-bs-dismiss="modal")
+                
+                .modal-body
+                    p.mb-0 Bạn có chắc chắn muốn xóa danh mục 
+                        strong #{productCategory.title}
+                        | ? Hành động này không thể hoàn tác.
+                
+                .modal-footer
+                    button.btn.btn-secondary(data-bs-dismiss="modal") Hủy
+                    form(action=`/admin/products-category/delete/${productCategory._id}` method="POST")
+                        button.btn.btn-danger(type="submit") Xóa danh mục
+

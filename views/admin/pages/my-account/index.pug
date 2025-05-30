@@ -1,0 +1,57 @@
+extends ../../layouts/default.pug
+block main
+    .container.py-4
+
+        .row.justify-content-center
+            .col-md-8
+                .card.shadow-lg
+                    .card-header.bg-primary.text-white.py-3
+                        h4.mb-0
+                            i.fas.fa-id-card.me-2
+                            | Hồ sơ của tôi
+
+                    .card-body.py-4
+                        .text-center.mb-4
+                            .avatar-wrapper.position-relative.d-inline-block
+                                if user.avatar
+                                    img.rounded-circle.border-3.border-white.shadow(
+                                        src=user.avatar
+                                        alt=user.fullName
+                                        style="width: 180px; height: 180px; object-fit: cover;"
+                                    )
+                                else 
+                                    .avatar-placeholder.rounded-circle.bg-secondary.d-flex.align-items-center.justify-content-center(
+                                        style="width: 180px; height: 180px;"
+                                    )
+                                        i.fas.fa-user.fa-4x.text-white
+                                .status-badge.position-absolute.bottom-0.end-0
+                                    if user.status === "active"
+                                        span.badge.rounded-pill.bg-success.p-2
+                                            i.fas.fa-check-circle.me-1
+                                            | Hoạt động
+                                    else
+                                        span.badge.rounded-pill.bg-danger.p-2
+                                            i.fas.fa-ban.me-1
+                                            | Đã khóa
+
+                        .row.g-4
+                            .col-md-6
+                                .info-group
+                                    label.text-muted.small.mb-1
+                                        i.fas.fa-user.me-2
+                                        | Họ và tên
+                                    .form-control-plaintext.fw-bold.fs-5 #{user.fullName}
+
+                            .col-md-6
+                                .info-group
+                                    label.text-muted.small.mb-1
+                                        i.fas.fa-envelope.me-2
+                                        | Email
+                                    .form-control-plaintext.fw-bold.fs-5 #{user.email}
+
+                            .col-md-6
+                                .info-group
+                                    label.text-muted.small.mb-1
+                                        i.fas.fa-phone.me-2
+                                        | Số điện thoại
+                                    .form-control-plaintext.fw-bold.fs-5 #{user.phone || "Chưa cập nhật"}

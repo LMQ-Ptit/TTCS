@@ -4,7 +4,8 @@ const paginationHelper = require("../../helpers/pagination");
 // Thêm vào controller hiện có
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const yoloDetector = require('../../yolov5_7/yolo-detector');
+// Giả sử bạn đã cài đặt yolov5_7
 module.exports.index = async(req, res) => {
     try {
         const keyword = req.query.keyword;
@@ -84,6 +85,7 @@ module.exports.index = async(req, res) => {
     }
 }
 
+// Cập nhật phương thức searchByImage
 module.exports.searchByImage = async (req, res) => {
     try {
         // Kiểm tra file upload
@@ -92,68 +94,48 @@ module.exports.searchByImage = async (req, res) => {
             return res.redirect("/search");
         }
 
-        console.log("Đã nhận file:", req.file.path);
+        console.log("Ảnh đã được tải lên:", req.file.path);
         
-        // Đường dẫn đến script Python
-        const pythonScript = path.join(__dirname, '../../yolov5_7/detect_objects.py');
+        // Đường dẫn đến thư mục chứa ảnh
+        const imageDir = path.dirname(req.file.path);
+        // Đường dẫn đến file weights
+        const weightsPath = path.join(__dirname, '../../yolov5_7/yolov5/best.pt');
         
-        // Gọi script Python để phát hiện đối tượng trong ảnh
-        const pythonProcess = spawn('python', [pythonScript, req.file.path]);
-        
-        let outputData = '';
-        let errorData = '';
-        
-        // Thu thập output từ script Python
-        pythonProcess.stdout.on('data', (data) => {
-            outputData += data.toString();
-        });
-        
-        // Thu thập lỗi nếu có
-        pythonProcess.stderr.on('data', (data) => {
-            errorData += data.toString();
-            console.error("Python error:", data.toString());
-        });
-        
-        // Xử lý kết quả khi script Python hoàn thành
-        pythonProcess.on('close', async (code) => {
+        try {
+            // Gọi API để phát hiện đối tượng
+            const result = await yoloDetector.detectObjectsInFolder(imageDir, weightsPath, 0.25);
+            
+            // Sau khi xử lý xong, xóa ảnh để giải phóng không gian
             try {
-                if (code !== 0) {
-                    console.error(`Python process exited with code ${code}`);
-                    throw new Error(`Lỗi khi phát hiện đối tượng (mã lỗi: ${code})`);
-                }
-                
-                // Parse kết quả JSON
-                const detectionResults = JSON.parse(outputData);
-                
-                // Kiểm tra nếu có lỗi từ Python
-                if (detectionResults.error) {
-                    throw new Error(`Lỗi phát hiện đối tượng: ${detectionResults.error}`);
-                }
-                
-                // Kiểm tra nếu không phát hiện đối tượng nào
-                if (detectionResults.length === 0) {
-                    req.flash("warning", "Không phát hiện được đối tượng nào trong hình ảnh");
-                    return res.redirect("/search");
-                }
-                
-                // Lấy danh sách nhãn để tìm kiếm
-                const labels = detectionResults.map(item => item.label);
-                
-                // Tạo từ khóa từ các nhãn (chỉ lấy tối đa 3 nhãn có độ tin cậy cao nhất)
-                const keyword = labels.slice(0, 3).join(" ");
-                console.log("Tìm kiếm với từ khóa:", keyword);
-                
-                // Chuyển hướng đến trang tìm kiếm với từ khóa là nhãn đã phát hiện
-                res.redirect(`/search?keyword=${encodeURIComponent(keyword)}`);
-                
-            } catch (error) {
-                console.error("Lỗi xử lý kết quả phát hiện đối tượng:", error);
-                req.flash("error", error.message);
-                res.redirect("/search");
+                fs.unlinkSync(req.file.path);
+                console.log("Đã xóa file tạm:", req.file.path);
+            } catch (err) {
+                console.error("Lỗi khi xóa file:", err);
             }
-        });
+            
+            // Lấy các nhãn duy nhất để tìm kiếm
+            const uniqueLabels = yoloDetector.getUniqueLabels(result);
+            
+            if (!uniqueLabels || uniqueLabels.length === 0) {
+                req.flash("warning", "Không phát hiện được đối tượng nào trong hình ảnh");
+                return res.redirect("/search");
+            }
+            
+            // Chuyển đổi nhãn thành từ khóa tìm kiếm
+            const keyword = yoloDetector.getLabelsString(result);
+            console.log("Tìm kiếm với từ khóa:", keyword);
+            
+            // Chuyển hướng đến URL tìm kiếm với từ khóa phát hiện được
+            res.redirect(`/search?keyword=${encodeURIComponent(keyword)}`);
+            
+        } catch (error) {
+            console.error("Lỗi khi phát hiện đối tượng:", error);
+            req.flash("error", "Có lỗi xảy ra khi phân tích hình ảnh");
+            res.redirect("/search");
+        }
+        
     } catch (error) {
-        console.error("Lỗi tại search.searchByImage:", error);
+        console.error("Lỗi trong searchByImage:", error);
         req.flash("error", "Có lỗi xảy ra khi tìm kiếm bằng hình ảnh");
         res.redirect("/search");
     }
